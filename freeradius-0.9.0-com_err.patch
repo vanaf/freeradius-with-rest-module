@@ -1,0 +1,11 @@
+--- freeradius-0.9.0/src/modules/rlm_krb5/rlm_krb5.c.link	2003-03-17 22:38:52.000000000 +0100
++++ freeradius-0.9.0/src/modules/rlm_krb5/rlm_krb5.c	2003-09-01 15:54:10.000000000 +0200
+@@ -37,7 +37,7 @@
+ 
+ /* krb5 includes */
+ #include <krb5.h>
+-#include <com_err.h>
++#include <et/com_err.h>
+ 
+ #ifndef HEIMDAL_KRB5
+ static int verify_krb5_tgt(krb5_context context, const char *user,

@@ -1,17 +1,18 @@
 Summary: High-performance and highly configurable free RADIUS server.
 Name: freeradius
-Version: 0.9.0
-Release: 2
+Version: 0.9.1
+Release: 1
 License: GPL
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
 Source0: ftp://ftp.freeradius.org/pub/radius/%{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Requires: chkconfig net-snmp krb5-libs net-snmp-utils
-BuildRequires: net-snmp-devel krb5-devel openldap-devel postgresql-devel perl mysql-devel unixODBC-devel
+BuildRequires: net-snmp-devel net-snmp-utils krb5-devel openldap-devel postgresql-devel perl mysql-devel unixODBC-devel
 Patch1: freeradius-0.9.0-ltdl_no_la.patch
 Patch2: freeradius-0.9.0-libdir.patch
 Patch3: freeradius-0.9.0-pam-multilib.patch
+Patch4: freeradius-0.9.0-com_err.patch
 
 %description
 The FreeRADIUS Server Project is a high performance and highly configurable 
@@ -90,10 +91,11 @@ done when adding or deleting new users.
 
 
 %prep
-%setup -q -n freeradius-0.9.0
+%setup -q
 %patch1 -p1 -b .ltdl_no_la
 %patch2 -p1 -b .libdir
 %patch3 -p1 -b .pam-multilib
+%patch4 -p1 -b .com_err
 
 %build
 %configure \
@@ -101,11 +103,11 @@ done when adding or deleting new users.
 	--with-gnu-ld \
 	--with-threads \
 	--with-thread-pool \
-	--with-system-libtool \
  	--disable-ltdl-install \
 	--with-rlm-sql_postgresql-include-dir=/usr/include/pgsql \
 	--with-rlm-sql_mysql-include-dir=/usr/include/mysql \
 	--with-mysql-lib-dir=%{_libdir}/mysql \
+	--with-rlm-dbm-lib-dir=%{_libdir} \
 	--with-rlm-krb5-include-dir=/usr/kerberos/include
 make
 
@@ -209,14 +211,17 @@ fi
 
 
 %changelog
-* Tue Sep 23 2003 Thomas Woerner <twoerner@redhat.com> 0.9.0-2
-- add ltdl patch again (libtool ltld s searching for .la only)
+* Mon Sep 29 2003 Thomas Woerner <twoerner@redhat.com> 0.9.1-1
+- new version 0.9.1
 
-* Mon Sep 22 2003 Nalin Dahyabhai <nalin@redhat.com>
+* Mon Sep 22 2003 Nalin Dahyabhai <nalin@redhat.com> 0.9.0-2.2
 - modify default PAM configuration to remove the directory part of the module
   name, so that 32- and 64-bit libpam (called from 32- or 64-bit radiusd) on
   multilib systems will always load the right module for the architecture
 - modify default PAM configuration to use pam_stack
+
+* Mon Sep  1 2003 Thomas Woerner <twoerner@redhat.com> 0.9.0-2.1
+- com_err.h moved to /usr/include/et
 
 * Tue Jul 22 2003 Thomas Woerner <twoerner@redhat.com> 0.9.0-1
 - 0.9.0 final
