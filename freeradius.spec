@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server.
 Name: freeradius
-Version: 0.9.1
-Release: 1
+Version: 0.9.3
+Release: 3.2.1
 License: GPL
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -13,6 +13,7 @@ Patch1: freeradius-0.9.0-ltdl_no_la.patch
 Patch2: freeradius-0.9.0-libdir.patch
 Patch3: freeradius-0.9.0-pam-multilib.patch
 Patch4: freeradius-0.9.0-com_err.patch
+Patch5: freeradius-0.9.3-pie.patch
 
 %description
 The FreeRADIUS Server Project is a high performance and highly configurable 
@@ -96,8 +97,14 @@ done when adding or deleting new users.
 %patch2 -p1 -b .libdir
 %patch3 -p1 -b .pam-multilib
 %patch4 -p1 -b .com_err
+%patch5 -p1 -b .pie
 
 %build
+%ifarch s390 s390x
+export CFLAGS="$RPM_OPT_FLAGS -fPIC"
+%else
+export CFLAGS="$RPM_OPT_FLAGS -fpic"
+%endif
 %configure \
 	--disable-static \
 	--with-gnu-ld \
@@ -127,6 +134,8 @@ perl -i -pe 's/#	shadow =/shadow =/' $RADDB/radiusd.conf
 install -m 755 redhat/rc.radiusd-redhat $RPM_BUILD_ROOT/etc/rc.d/init.d/radiusd
 install -m 644 redhat/radiusd-logrotate $RPM_BUILD_ROOT/etc/logrotate.d/radiusd
 install -m 644 redhat/radiusd-pam $RPM_BUILD_ROOT/etc/pam.d/radius
+
+install -m 644 src/modules/rlm_sql/drivers/rlm_sql_*/*.sql $RPM_BUILD_ROOT%{_docdir}/freeradius-%{version}*/
 
 # remove unwanted rc.radiusd
 rm -f $RPM_BUILD_ROOT%{_prefix}/sbin/rc.radiusd
@@ -211,6 +220,27 @@ fi
 
 
 %changelog
+* Tue Mar 02 2004 Elliot Lee <sopwith@redhat.com>
+- rebuilt
+
+* Tue Feb 24 2004 Thomas Woerner <twoerner@redhat.com> 0.9.3-3.2
+- added sql scripts for rlm_sql to documentation (#116435)
+
+* Fri Feb 13 2004 Elliot Lee <sopwith@redhat.com>
+- rebuilt
+
+* Thu Feb  5 2004 Thomas Woerner <twoerner@redhat.com> 0.9.3-2.1
+- using -fPIC instead of -fpic for s390 ans s390x
+
+* Thu Feb  5 2004 Thomas Woerner <twoerner@redhat.com> 0.9.3-2
+- radiusd is pie, now
+
+* Tue Nov 25 2003 Thomas Woerner <twoerner@redhat.com> 0.9.3-1
+- new version 0.9.3 (bugfix release)
+
+* Fri Nov  7 2003 Thomas Woerner <twoerner@redhat.com> 0.9.2-1
+- new version 0.9.2
+
 * Mon Sep 29 2003 Thomas Woerner <twoerner@redhat.com> 0.9.1-1
 - new version 0.9.1
 
