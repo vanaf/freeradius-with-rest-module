@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server.
 Name: freeradius
 Version: 1.0.0
-Release: 2
+Release: 2.1
 License: GPL
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -139,7 +139,7 @@ perl -i -pe 's/#	shadow =/shadow =/' $RADDB/radiusd.conf
 
 install -m 755 redhat/rc.radiusd-redhat $RPM_BUILD_ROOT/etc/rc.d/init.d/radiusd
 install -m 644 redhat/radiusd-logrotate $RPM_BUILD_ROOT/etc/logrotate.d/radiusd
-install -m 644 redhat/radiusd-pam $RPM_BUILD_ROOT/etc/pam.d/radius
+install -m 644 redhat/radiusd-pam $RPM_BUILD_ROOT/etc/pam.d/radiusd
 
 install -m 644 src/modules/rlm_sql/drivers/rlm_sql_*/*.sql $RPM_BUILD_ROOT%{_docdir}/freeradius-%{version}*/
 
@@ -189,7 +189,7 @@ fi
 %files
 %defattr(-,root,root,-)
 %doc %{_docdir}/freeradius-%{version}*/
-%config (noreplace) /etc/pam.d/radius
+%config (noreplace) /etc/pam.d/radiusd
 %config (noreplace) /etc/logrotate.d/radiusd
 %config (noreplace) /etc/rc.d/init.d/radiusd
 %config (noreplace) /etc/raddb/[a-ce-z]*
@@ -227,6 +227,10 @@ fi
 
 
 %changelog
+* Wed Aug 25 2004 Thomas Woerner <twoerner@redhat.com> 1.0.0-2.1
+- renamed /etc/pam.d/radius to /etc/pam.d/radiusd to match default 
+  configuration (#130613)
+
 * Wed Aug 25 2004 Thomas Woerner <twoerner@redhat.com> 1.0.0-2
 - fixed BuildRequires for openssl-devel (#130606)
 
