@@ -1,20 +1,21 @@
 Summary: High-performance and highly configurable free RADIUS server.
 Name: freeradius
-Version: 0.9.3
-Release: 5
+Version: 1.0.0
+Release: 0.pre3.1
 License: GPL
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
-Source0: ftp://ftp.freeradius.org/pub/radius/%{name}-%{version}.tar.gz
+Source0: ftp://ftp.freeradius.org/pub/radius/%{name}-%{version}-pre3.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Requires: chkconfig net-snmp krb5-libs net-snmp-utils
 BuildRequires: net-snmp-devel net-snmp-utils krb5-devel openldap-devel postgresql-devel perl mysql-devel unixODBC-devel gdbm-devel
-Patch1: freeradius-0.9.0-ltdl_no_la.patch
+Patch1: freeradius-1.0.0-ltdl_no_la.patch
 Patch2: freeradius-0.9.0-libdir.patch
 Patch3: freeradius-0.9.0-pam-multilib.patch
 Patch4: freeradius-0.9.0-com_err.patch
-Patch5: freeradius-0.9.3-pie.patch
+Patch5: freeradius-1.0.0-pie.patch
 Patch6: freeradius-0.9.3-gcc34.patch
+Patch7: freeradius-1.0.0-sasl2.patch
 
 %description
 The FreeRADIUS Server Project is a high performance and highly configurable 
@@ -93,13 +94,14 @@ done when adding or deleting new users.
 
 
 %prep
-%setup -q
+%setup -q -n %{name}-%{version}-pre3
 %patch1 -p1 -b .ltdl_no_la
 %patch2 -p1 -b .libdir
 %patch3 -p1 -b .pam-multilib
 %patch4 -p1 -b .com_err
 %patch5 -p1 -b .pie
 %patch6 -p1 -b .gcc34
+%patch7 -p1 -b .sasl2
 
 %build
 %ifarch s390 s390x
@@ -191,6 +193,7 @@ fi
 %config (noreplace) /etc/raddb/[a-ce-z]*
 %config /etc/raddb/dictionary*
 %{_bindir}/*
+%{_libdir}/libeap*.so
 %{_libdir}/libradius*.so
 %{_libdir}/rlm_[a-r]*.so
 %{_libdir}/rlm_sql-%{version}*.so
@@ -222,6 +225,10 @@ fi
 
 
 %changelog
+* Thu Jul  1 2004 Thomas Woerner <twoerner@redhat.com> 1.0.0-0.pre3.1
+- third "pre" release of version 1.0.0
+- rlm_ldap is using SASLv2 (#126507)
+
 * Tue Jun 15 2004 Elliot Lee <sopwith@redhat.com>
 - rebuilt
 
