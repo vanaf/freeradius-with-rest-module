@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server.
 Name: freeradius
 Version: 1.0.1
-Release: 2
+Release: 3
 License: GPL
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -20,6 +20,7 @@ Patch7: freeradius-1.0.0-sasl2.patch
 Patch8: freeradius-1.0.0-samba3.patch
 Patch9: freeradius-1.0.1-radrelay.patch
 Patch10: freeradius-1.0.1-build.patch
+Patch11: freeradius-1.0.1-lib64.patch
 
 %description
 The FreeRADIUS Server Project is a high performance and highly configurable 
@@ -113,6 +114,7 @@ done when adding or deleting new users.
 %patch9 -p1 -b .radrelay
 %patch10 -p1 -b .build
 
+
 %build
 %ifarch s390 s390x
 export CFLAGS="$RPM_OPT_FLAGS -fPIC"
@@ -120,16 +122,20 @@ export CFLAGS="$RPM_OPT_FLAGS -fPIC"
 export CFLAGS="$RPM_OPT_FLAGS -fpic"
 %endif
 %configure \
-	--disable-static \
+	--enable-shared --disable-static \
 	--with-gnu-ld \
 	--with-threads \
 	--with-thread-pool \
- 	--disable-ltdl-install \
+ 	--disable-ltdl-install --with-system-libtool \
 	--with-rlm-sql_postgresql-include-dir=/usr/include/pgsql \
 	--with-rlm-sql_mysql-include-dir=/usr/include/mysql \
 	--with-mysql-lib-dir=%{_libdir}/mysql \
 	--with-rlm-dbm-lib-dir=%{_libdir} \
 	--with-rlm-krb5-include-dir=/usr/kerberos/include
+%if "%{_lib}" == "lib64"
+perl -pi -e 's:sys_lib_search_path_spec=.*:sys_lib_search_path_spec="/lib64 /usr/lib64 /usr/local/lib64":' libtool
+%endif
+
 make
 
 
@@ -235,6 +241,10 @@ fi
 
 
 %changelog
+* Fri Nov 19 2004 Thomas Woerner <twoerner@redhat.com> 1.0.1-3
+- rebuild for MySQL 4
+- switched over to installed libtool
+
 * Fri Nov  5 2004 Thomas Woerner <twoerner@redhat.com> 1.0.1-2
 - Fixed install problem of radeapclient (#138069)
 
