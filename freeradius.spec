@@ -125,7 +125,7 @@ export CFLAGS="$RPM_OPT_FLAGS -fpic"
 	--with-gnu-ld \
 	--with-threads \
 	--with-thread-pool \
- 	--disable-ltdl-install --with-system-libtool \
+ 	--disable-ltdl-install \
 	--with-rlm-sql_postgresql-include-dir=/usr/include/pgsql \
 	--with-rlm-sql_mysql-include-dir=/usr/include/mysql \
 	--with-mysql-lib-dir=%{_libdir}/mysql \
