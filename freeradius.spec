@@ -20,7 +20,6 @@ Patch7: freeradius-1.0.0-sasl2.patch
 Patch8: freeradius-1.0.0-samba3.patch
 Patch9: freeradius-1.0.1-radrelay.patch
 Patch10: freeradius-1.0.1-build.patch
-Patch11: freeradius-1.0.1-lib64.patch
 
 %description
 The FreeRADIUS Server Project is a high performance and highly configurable 
