@@ -1,14 +1,14 @@
 Summary: High-performance and highly configurable free RADIUS server.
 Name: freeradius
 Version: 1.0.0
-Release: 1
+Release: 2
 License: GPL
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
 Source0: ftp://ftp.freeradius.org/pub/radius/%{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Requires: chkconfig net-snmp krb5-libs net-snmp-utils
-BuildRequires: net-snmp-devel net-snmp-utils krb5-devel openldap-devel postgresql-devel perl mysql-devel unixODBC-devel gdbm-devel zlib-devel
+BuildRequires: net-snmp-devel net-snmp-utils krb5-devel openldap-devel postgresql-devel perl mysql-devel unixODBC-devel gdbm-devel zlib-devel openssl-devel
 Patch1: freeradius-1.0.0-ltdl_no_la.patch
 Patch2: freeradius-1.0.0-libdir.patch
 Patch3: freeradius-0.9.0-pam-multilib.patch
@@ -227,6 +227,9 @@ fi
 
 
 %changelog
+* Wed Aug 25 2004 Thomas Woerner <twoerner@redhat.com> 1.0.0-2
+- fixed BuildRequires for openssl-devel (#130606)
+
 * Mon Aug 16 2004 Thomas Woerner <twoerner@redhat.com> 1.0.0-1
 - 1.0.0 final
 
