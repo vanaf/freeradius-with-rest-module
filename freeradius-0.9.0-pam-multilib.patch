@@ -1,0 +1,21 @@
+Remove the directory component from all paths.  This lets libpam search its
+default directory for modules, which is needed on multilib systems because
+a 64-bit binary can't use the 32-bit modules which are stored in /lib/security.
+
+Use pam_stack to make password-checking mechanisms configurable by authconfig.
+
+--- freeradius-0.9.0/redhat/radiusd-pam	2003-09-22 10:07:03.000000000 -0400
++++ freeradius-0.9.0/redhat/radiusd-pam	2003-09-22 10:07:13.000000000 -0400
+@@ -1,7 +1,6 @@
+ #%PAM-1.0
+-auth       required	/lib/security/pam_unix_auth.so shadow nullok
+-auth       required	/lib/security/pam_nologin.so
+-account    required	/lib/security/pam_unix_acct.so
+-password   required	/lib/security/pam_cracklib.so
+-password   required	/lib/security/pam_unix_password.so shadow nullok use_authtok
+-session    required	/lib/security/pam_unix_session.so
++auth       required	pam_stack.so service=system-auth
++auth       required	pam_nologin.so
++account    required	pam_stack.so service=system-auth
++password   required	pam_stack.so service=system-auth
++session    required	pam_stack.so service=system-auth
