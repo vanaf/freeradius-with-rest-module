@@ -1,21 +1,22 @@
 Summary: High-performance and highly configurable free RADIUS server.
 Name: freeradius
 Version: 1.0.0
-Release: 0.pre3.1
+Release: 0.pre3.2
 License: GPL
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
 Source0: ftp://ftp.freeradius.org/pub/radius/%{name}-%{version}-pre3.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Requires: chkconfig net-snmp krb5-libs net-snmp-utils
-BuildRequires: net-snmp-devel net-snmp-utils krb5-devel openldap-devel postgresql-devel perl mysql-devel unixODBC-devel gdbm-devel
+BuildRequires: net-snmp-devel net-snmp-utils krb5-devel openldap-devel postgresql-devel perl mysql-devel unixODBC-devel gdbm-devel zlib-devel
 Patch1: freeradius-1.0.0-ltdl_no_la.patch
-Patch2: freeradius-0.9.0-libdir.patch
+Patch2: freeradius-1.0.0-libdir.patch
 Patch3: freeradius-0.9.0-pam-multilib.patch
 Patch4: freeradius-0.9.0-com_err.patch
 Patch5: freeradius-1.0.0-pie.patch
 Patch6: freeradius-0.9.3-gcc34.patch
 Patch7: freeradius-1.0.0-sasl2.patch
+Patch8: freeradius-1.0.0-samba3.patch
 
 %description
 The FreeRADIUS Server Project is a high performance and highly configurable 
@@ -102,6 +103,7 @@ done when adding or deleting new users.
 %patch5 -p1 -b .pie
 %patch6 -p1 -b .gcc34
 %patch7 -p1 -b .sasl2
+%patch8 -p1 -b .samba3
 
 %build
 %ifarch s390 s390x
@@ -225,6 +227,11 @@ fi
 
 
 %changelog
+* Mon Jul  5 2004 Thomas Woerner <twoerner@redhat.com> 1.0.0-0.pre3.2
+- added buildrequires for zlib-devel (#127162)
+- fixed libdir patch to prefer own libeap instead of installed one (#127168)
+- fixed samba account maps in LDAP for samba v3 (#127173)
+
 * Thu Jul  1 2004 Thomas Woerner <twoerner@redhat.com> 1.0.0-0.pre3.1
 - third "pre" release of version 1.0.0
 - rlm_ldap is using SASLv2 (#126507)

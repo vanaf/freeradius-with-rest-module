@@ -1,0 +1,15 @@
+--- freeradius-1.0.0-pre3/raddb/ldap.attrmap.samba3	2004-07-05 11:57:14.861611615 +0200
++++ freeradius-1.0.0-pre3/raddb/ldap.attrmap	2004-07-05 11:57:47.134087708 +0200
+@@ -24,9 +24,9 @@
+ checkItem	Simultaneous-Use		radiusSimultaneousUse
+ checkItem	Called-Station-Id		radiusCalledStationId
+ checkItem	Calling-Station-Id		radiusCallingStationId
+-checkItem	LM-Password			lmPassword
+-checkItem	NT-Password			ntPassword
+-checkItem	SMB-Account-CTRL-TEXT		acctFlags
++checkItem	LM-Password			sambaLMPassword
++checkItem	NT-Password			sambaNTPassword
++checkItem	SMB-Account-CTRL-TEXT		sambaAcctFlags
+ checkItem	Expiration			radiusExpiration
+ 
+ replyItem	Service-Type			radiusServiceType
