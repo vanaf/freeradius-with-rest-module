@@ -1,11 +1,11 @@
 Summary: High-performance and highly configurable free RADIUS server.
 Name: freeradius
 Version: 1.0.0
-Release: 0.pre3.2
+Release: 1
 License: GPL
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
-Source0: ftp://ftp.freeradius.org/pub/radius/%{name}-%{version}-pre3.tar.gz
+Source0: ftp://ftp.freeradius.org/pub/radius/%{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Requires: chkconfig net-snmp krb5-libs net-snmp-utils
 BuildRequires: net-snmp-devel net-snmp-utils krb5-devel openldap-devel postgresql-devel perl mysql-devel unixODBC-devel gdbm-devel zlib-devel
@@ -95,7 +95,7 @@ done when adding or deleting new users.
 
 
 %prep
-%setup -q -n %{name}-%{version}-pre3
+%setup -q 
 %patch1 -p1 -b .ltdl_no_la
 %patch2 -p1 -b .libdir
 %patch3 -p1 -b .pam-multilib
@@ -227,6 +227,9 @@ fi
 
 
 %changelog
+* Mon Aug 16 2004 Thomas Woerner <twoerner@redhat.com> 1.0.0-1
+- 1.0.0 final
+
 * Mon Jul  5 2004 Thomas Woerner <twoerner@redhat.com> 1.0.0-0.pre3.2
 - added buildrequires for zlib-devel (#127162)
 - fixed libdir patch to prefer own libeap instead of installed one (#127168)
