@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server.
 Name: freeradius
 Version: 1.0.1
-Release: 1
+Release: 2
 License: GPL
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -19,6 +19,7 @@ Patch6: freeradius-0.9.3-gcc34.patch
 Patch7: freeradius-1.0.0-sasl2.patch
 Patch8: freeradius-1.0.0-samba3.patch
 Patch9: freeradius-1.0.1-radrelay.patch
+Patch10: freeradius-1.0.1-build.patch
 
 %description
 The FreeRADIUS Server Project is a high performance and highly configurable 
@@ -110,6 +111,7 @@ done when adding or deleting new users.
 %patch7 -p1 -b .sasl2
 %patch8 -p1 -b .samba3
 %patch9 -p1 -b .radrelay
+%patch10 -p1 -b .build
 
 %build
 %ifarch s390 s390x
@@ -233,6 +235,9 @@ fi
 
 
 %changelog
+* Fri Nov  5 2004 Thomas Woerner <twoerner@redhat.com> 1.0.1-2
+- Fixed install problem of radeapclient (#138069)
+
 * Wed Oct  6 2004 Thomas Woerner <twoerner@redhat.com> 1.0.1-1
 - new version 1.0.1
 - applied radrelay CVS patch from Kevin Bonner
