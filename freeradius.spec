@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server.
 Name: freeradius
-Version: 1.0.1
-Release: 3
+Version: 1.0.2
+Release: 1
 License: GPL
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -16,9 +16,8 @@ Patch3: freeradius-0.9.0-pam-multilib.patch
 Patch4: freeradius-0.9.0-com_err.patch
 Patch5: freeradius-1.0.0-pie.patch
 Patch6: freeradius-0.9.3-gcc34.patch
-Patch7: freeradius-1.0.0-sasl2.patch
+Patch7: freeradius-1.0.2-sasl2.patch
 Patch8: freeradius-1.0.0-samba3.patch
-Patch9: freeradius-1.0.1-radrelay.patch
 Patch10: freeradius-1.0.1-build.patch
 
 %description
@@ -110,7 +109,6 @@ done when adding or deleting new users.
 %patch6 -p1 -b .gcc34
 %patch7 -p1 -b .sasl2
 %patch8 -p1 -b .samba3
-%patch9 -p1 -b .radrelay
 %patch10 -p1 -b .build
 
 
@@ -240,6 +238,9 @@ fi
 
 
 %changelog
+* Mon Apr  4 2005 Thomas Woerner <twoerner@redhat.com> 1.0.2-1
+- new version 1.0.2
+
 * Fri Nov 19 2004 Thomas Woerner <twoerner@redhat.com> 1.0.1-3
 - rebuild for MySQL 4
 - switched over to installed libtool
