@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server.
 Name: freeradius
 Version: 0.9.3
-Release: 3.2.1
+Release: 4
 License: GPL
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -14,6 +14,7 @@ Patch2: freeradius-0.9.0-libdir.patch
 Patch3: freeradius-0.9.0-pam-multilib.patch
 Patch4: freeradius-0.9.0-com_err.patch
 Patch5: freeradius-0.9.3-pie.patch
+Patch6: freeradius-0.9.3-gcc34.patch
 
 %description
 The FreeRADIUS Server Project is a high performance and highly configurable 
@@ -98,6 +99,7 @@ done when adding or deleting new users.
 %patch3 -p1 -b .pam-multilib
 %patch4 -p1 -b .com_err
 %patch5 -p1 -b .pie
+%patch6 -p1 -b .gcc34
 
 %build
 %ifarch s390 s390x
@@ -220,6 +222,9 @@ fi
 
 
 %changelog
+* Tue Mar 30 2004 Harald Hoyer <harald@redhat.com> - 0.9.3-4
+- gcc34 compilation fixes
+
 * Tue Mar 02 2004 Elliot Lee <sopwith@redhat.com>
 - rebuilt
 
