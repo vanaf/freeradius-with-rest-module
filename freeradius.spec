@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server.
 Name: freeradius
 Version: 0.9.3
-Release: 4.1
+Release: 5
 License: GPL
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -222,6 +222,9 @@ fi
 
 
 %changelog
+* Tue Jun 15 2004 Elliot Lee <sopwith@redhat.com>
+- rebuilt
+
 * Thu Jun  3 2004 Thomas Woerner <twoerner@redhat.com> 0.9.3-4.1
 - fixed BuildRequires for gdbm-devel
 
