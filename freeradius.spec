@@ -1,14 +1,15 @@
 Summary: High-performance and highly configurable free RADIUS server.
 Name: freeradius
 Version: 1.0.0
-Release: 2.1
+Release: 3
 License: GPL
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
 Source0: ftp://ftp.freeradius.org/pub/radius/%{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Requires: chkconfig net-snmp krb5-libs net-snmp-utils
-BuildRequires: net-snmp-devel net-snmp-utils krb5-devel openldap-devel postgresql-devel perl mysql-devel unixODBC-devel gdbm-devel zlib-devel openssl-devel
+BuildRequires: net-snmp-devel net-snmp-utils krb5-devel openldap-devel postgresql-devel 
+BuildRequires: mysql-devel unixODBC-devel gdbm-devel zlib-devel openssl-devel libtool pam-devel
 Patch1: freeradius-1.0.0-ltdl_no_la.patch
 Patch2: freeradius-1.0.0-libdir.patch
 Patch3: freeradius-0.9.0-pam-multilib.patch
@@ -36,6 +37,7 @@ done when adding or deleting new users.
 %package mysql
 Summary: MySQL bindings for freeradius
 Group: System Environment/Daemons
+Requires: %{name} = %{version}-%{release}
 Requires: mysql
 
 %description mysql
@@ -56,6 +58,7 @@ done when adding or deleting new users.
 %package postgresql
 Summary: postgresql bindings for freeradius
 Group: System Environment/Daemons
+Requires: %{name} = %{version}-%{release}
 Requires: postgresql
 
 %description postgresql
@@ -70,12 +73,13 @@ protocol, as defined in RFC 2865 (and others). It allows Network Access
 Servers (NAS boxes) to perform authentication for dial-up users. There are 
 also RADIUS clients available for Web servers, firewalls, Unix logins, and 
 more.  Using RADIUS allows authentication and authorization for a network to 
-be centralized, and minimizes the amount of BuildRequires: gdbm-develre-configuration which has to be 
+be centralized, and minimizes the amount of re-configuration which has to be 
 done when adding or deleting new users.
 
 %package unixODBC
 Summary: unixODBC bindings for freeradius
 Group: System Environment/Daemons
+Requires: %{name} = %{version}-%{release}
 Requires: unixODBC
 
 %description unixODBC
@@ -227,6 +231,11 @@ fi
 
 
 %changelog
+* Wed Aug 25 2004 Warren Togami <wtogami@redhat.com> 1.0.0-3
+- BuildRequires pam-devel and libtool
+- Fix errant text in description
+- Other minor cleanups
+
 * Wed Aug 25 2004 Thomas Woerner <twoerner@redhat.com> 1.0.0-2.1
 - renamed /etc/pam.d/radius to /etc/pam.d/radiusd to match default 
   configuration (#130613)
