@@ -1,14 +1,14 @@
 Summary: High-performance and highly configurable free RADIUS server.
 Name: freeradius
 Version: 0.9.3
-Release: 4
+Release: 4.1
 License: GPL
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
 Source0: ftp://ftp.freeradius.org/pub/radius/%{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Requires: chkconfig net-snmp krb5-libs net-snmp-utils
-BuildRequires: net-snmp-devel net-snmp-utils krb5-devel openldap-devel postgresql-devel perl mysql-devel unixODBC-devel
+BuildRequires: net-snmp-devel net-snmp-utils krb5-devel openldap-devel postgresql-devel perl mysql-devel unixODBC-devel gdbm-devel
 Patch1: freeradius-0.9.0-ltdl_no_la.patch
 Patch2: freeradius-0.9.0-libdir.patch
 Patch3: freeradius-0.9.0-pam-multilib.patch
@@ -68,7 +68,7 @@ protocol, as defined in RFC 2865 (and others). It allows Network Access
 Servers (NAS boxes) to perform authentication for dial-up users. There are 
 also RADIUS clients available for Web servers, firewalls, Unix logins, and 
 more.  Using RADIUS allows authentication and authorization for a network to 
-be centralized, and minimizes the amount of re-configuration which has to be 
+be centralized, and minimizes the amount of BuildRequires: gdbm-develre-configuration which has to be 
 done when adding or deleting new users.
 
 %package unixODBC
@@ -222,6 +222,9 @@ fi
 
 
 %changelog
+* Thu Jun  3 2004 Thomas Woerner <twoerner@redhat.com> 0.9.3-4.1
+- fixed BuildRequires for gdbm-devel
+
 * Tue Mar 30 2004 Harald Hoyer <harald@redhat.com> - 0.9.3-4
 - gcc34 compilation fixes
 
