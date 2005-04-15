@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server.
 Name: freeradius
 Version: 1.0.2
-Release: 1
+Release: 2
 License: GPL
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -238,6 +238,9 @@ fi
 
 
 %changelog
+* Thu Apr 14 2005 Warren Togami <wtogami@redhat.com> 1.0.2-2
+- rebuild against new postgresql-libs
+
 * Mon Apr  4 2005 Thomas Woerner <twoerner@redhat.com> 1.0.2-1
 - new version 1.0.2
 
