@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server.
 Name: freeradius
-Version: 1.0.2
-Release: 2
+Version: 1.0.4
+Release: 1
 License: GPL
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -18,7 +18,7 @@ Patch5: freeradius-1.0.0-pie.patch
 Patch6: freeradius-0.9.3-gcc34.patch
 Patch7: freeradius-1.0.2-sasl2.patch
 Patch8: freeradius-1.0.0-samba3.patch
-Patch10: freeradius-1.0.1-build.patch
+Patch10: freeradius-1.0.4-build.patch
 
 %description
 The FreeRADIUS Server Project is a high performance and highly configurable 
@@ -238,6 +238,10 @@ fi
 
 
 %changelog
+* Tue Jun 28 2005 Thomas Woerner <twoerner@redhat.com> 1.0.4-1
+- new version 1.0.4
+- droppend radrelay patch (fixed upstream)
+
 * Thu Apr 14 2005 Warren Togami <wtogami@redhat.com> 1.0.2-2
 - rebuild against new postgresql-libs
 
