@@ -1,14 +1,14 @@
 Summary: High-performance and highly configurable free RADIUS server.
 Name: freeradius
 Version: 1.0.4
-Release: 1
+Release: 2
 License: GPL
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
 Source0: ftp://ftp.freeradius.org/pub/radius/%{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Requires: chkconfig net-snmp krb5-libs net-snmp-utils
-BuildRequires: net-snmp-devel net-snmp-utils krb5-devel openldap-devel postgresql-devel 
+BuildRequires: net-snmp-devel net-snmp-utils krb5-devel openldap-devel postgresql-devel libtool-ltdl-devel
 BuildRequires: mysql-devel unixODBC-devel gdbm-devel zlib-devel openssl-devel libtool pam-devel
 Patch1: freeradius-1.0.0-ltdl_no_la.patch
 Patch2: freeradius-1.0.0-libdir.patch
@@ -208,10 +208,35 @@ fi
 %{_bindir}/*
 %{_libdir}/libeap*.so
 %{_libdir}/libradius*.so
-%{_libdir}/rlm_[a-r]*.so
-%{_libdir}/rlm_sql-%{version}*.so
-%{_libdir}/rlm_sql.so
-%{_libdir}/rlm_[t-z]*.so
+%{_libdir}/rlm_acct_unique*.so
+%{_libdir}/rlm_always*.so
+%{_libdir}/rlm_attr_filter*.so
+%{_libdir}/rlm_attr_rewrite*.so
+%{_libdir}/rlm_chap*.so
+%{_libdir}/rlm_checkval*.so
+%{_libdir}/rlm_counter*.so
+%{_libdir}/rlm_dbm*.so
+%{_libdir}/rlm_detail*.so
+%{_libdir}/rlm_digest*.so
+%{_libdir}/rlm_eap*.so
+%{_libdir}/rlm_exec*.so
+%{_libdir}/rlm_expr*.so
+%{_libdir}/rlm_fastusers*.so
+%{_libdir}/rlm_files*.so
+%{_libdir}/rlm_ippool*.so
+%{_libdir}/rlm_krb5*.so
+%{_libdir}/rlm_ldap*.so
+%{_libdir}/rlm_mschap*.so
+%{_libdir}/rlm_ns_mta_md5*.so
+%{_libdir}/rlm_pam*.so
+%{_libdir}/rlm_pap*.so
+%{_libdir}/rlm_passwd*.so
+%{_libdir}/rlm_preprocess*.so
+%{_libdir}/rlm_radutmp*.so
+%{_libdir}/rlm_realm*.so
+%{_libdir}/rlm_sql*.so
+%{_libdir}/rlm_unix*.so
+%{_libdir}/rlm_x99_token*.so
 %{_datadir}/freeradius
 %{_sbindir}/*
 %{_mandir}/man1/*.1*
@@ -238,6 +263,10 @@ fi
 
 
 %changelog
+* Wed Jul 20 2005 Thomas Woerner <twoerner@redhat.com> 1.0.4-2
+- added missing build requires for libtool-ltdl-devel (#160877)
+- modified file list to get a report for missing plugins
+
 * Tue Jun 28 2005 Thomas Woerner <twoerner@redhat.com> 1.0.4-1
 - new version 1.0.4
 - droppend radrelay patch (fixed upstream)
