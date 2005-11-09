@@ -19,6 +19,7 @@ Patch6: freeradius-0.9.3-gcc34.patch
 Patch7: freeradius-1.0.2-sasl2.patch
 Patch8: freeradius-1.0.0-samba3.patch
 Patch10: freeradius-1.0.4-build.patch
+Patch11: freeradius-1.0.4-realloc-return.patch
 
 %description
 The FreeRADIUS Server Project is a high performance and highly configurable 
@@ -110,6 +111,7 @@ done when adding or deleting new users.
 %patch7 -p1 -b .sasl2
 %patch8 -p1 -b .samba3
 %patch10 -p1 -b .build
+%patch11 -p1 -b .realloc-return
 
 
 %build
@@ -265,6 +267,7 @@ fi
 %changelog
 * Wed Nov  9 2005 Tomas Mraz <tmraz@redhat.com> - 1.0.4-4
 - rebuilt with new openssl
+- fixed ignored return value of realloc
 
 * Fri Sep 30 2005 Tomas Mraz <tmraz@redhat.com> - 1.0.4-3
 - use include instead of pam_stack in pam config
