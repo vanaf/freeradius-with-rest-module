@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server.
 Name: freeradius
 Version: 1.0.4
-Release: 3
+Release: 4
 License: GPL
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -263,6 +263,9 @@ fi
 
 
 %changelog
+* Wed Nov  9 2005 Tomas Mraz <tmraz@redhat.com> - 1.0.4-4
+- rebuilt with new openssl
+
 * Fri Sep 30 2005 Tomas Mraz <tmraz@redhat.com> - 1.0.4-3
 - use include instead of pam_stack in pam config
 
