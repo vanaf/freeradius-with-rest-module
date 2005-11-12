@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server.
 Name: freeradius
 Version: 1.0.4
-Release: 4
+Release: 5
 License: GPL
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -265,6 +265,9 @@ fi
 
 
 %changelog
+* Sat Nov 12 2005 Tom Lane <tgl@redhat.com> - 1.0.4-5
+- Rebuild due to mysql update.
+
 * Wed Nov  9 2005 Tomas Mraz <tmraz@redhat.com> - 1.0.4-4
 - rebuilt with new openssl
 - fixed ignored return value of realloc
