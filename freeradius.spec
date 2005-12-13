@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server.
 Name: freeradius
-Version: 1.0.4
-Release: 5.1
+Version: 1.0.5
+Release: 1
 License: GPL
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -11,12 +11,11 @@ Requires: chkconfig net-snmp krb5-libs net-snmp-utils
 BuildRequires: net-snmp-devel net-snmp-utils krb5-devel openldap-devel postgresql-devel libtool-ltdl-devel
 BuildRequires: mysql-devel unixODBC-devel gdbm-devel zlib-devel openssl-devel libtool pam-devel
 Patch1: freeradius-1.0.0-ltdl_no_la.patch
-Patch2: freeradius-1.0.0-libdir.patch
+Patch2: freeradius-1.0.5-libdir.patch
 Patch3: freeradius-0.9.0-pam-multilib.patch
 Patch4: freeradius-0.9.0-com_err.patch
 Patch5: freeradius-1.0.0-pie.patch
 Patch6: freeradius-0.9.3-gcc34.patch
-Patch7: freeradius-1.0.2-sasl2.patch
 Patch8: freeradius-1.0.0-samba3.patch
 Patch10: freeradius-1.0.4-build.patch
 Patch11: freeradius-1.0.4-realloc-return.patch
@@ -108,7 +107,6 @@ done when adding or deleting new users.
 %patch4 -p1 -b .com_err
 %patch5 -p1 -b .pie
 %patch6 -p1 -b .gcc34
-%patch7 -p1 -b .sasl2
 %patch8 -p1 -b .samba3
 %patch10 -p1 -b .build
 %patch11 -p1 -b .realloc-return
@@ -265,6 +263,9 @@ fi
 
 
 %changelog
+* Tue Dec 13 2005 Thomas Woerner <twoerner@redhat.com> 1.0.5-1
+- new version 1.0.5
+
 * Fri Dec 09 2005 Jesse Keating <jkeating@redhat.com>
 - rebuilt
 
