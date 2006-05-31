@@ -94,10 +94,16 @@ export LDFLAGS="-L${RPM_BUILD_ROOT}%{_libdir}"
 	--with-thread-pool \
  	--disable-ltdl-install \
 	--with-rlm-sql_postgresql-include-dir=/usr/include/pgsql \
+	--with-rlm-sql-postgresql-lib-dir=%{_libdir} \
 	--with-rlm-sql_mysql-include-dir=/usr/include/mysql \
 	--with-mysql-lib-dir=%{_libdir}/mysql \
+	--with-unixodbc-lib-dir=%{_libdir} \
 	--with-rlm-dbm-lib-dir=%{_libdir} \
 	--with-rlm-krb5-include-dir=/usr/kerberos/include
+
+%if "%{_lib}" == "lib64"
+perl -pi -e 's:sys_lib_search_path_spec=.*:sys_lib_search_path_spec="/lib64 /usr/lib64 /usr/local/lib64":' libtool
+%endif
 
 make
 
