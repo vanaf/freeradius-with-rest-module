@@ -1,24 +1,25 @@
 Summary: High-performance and highly configurable free RADIUS server.
 Name: freeradius
-Version: 1.0.5
-Release: 1.2
+Version: 1.1.1
+Release: 1
 License: GPL
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
 Source0: ftp://ftp.freeradius.org/pub/radius/%{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Requires: chkconfig net-snmp krb5-libs net-snmp-utils
-BuildRequires: net-snmp-devel net-snmp-utils krb5-devel openldap-devel postgresql-devel libtool-ltdl-devel
-BuildRequires: mysql-devel unixODBC-devel gdbm-devel zlib-devel openssl-devel libtool pam-devel
+BuildRequires: net-snmp-devel net-snmp-utils krb5-devel openldap-devel 
+BuildRequires: openssl-devel pam-devel
+BuildRequires: libtool-ltdl-devel libtool
+BuildRequires: gdbm-devel zlib-devel
+BuildRequires: perl
+PreReq: shadow-utils
 Patch1: freeradius-1.0.0-ltdl_no_la.patch
-Patch2: freeradius-1.0.5-libdir.patch
 Patch3: freeradius-0.9.0-pam-multilib.patch
 Patch4: freeradius-0.9.0-com_err.patch
-Patch5: freeradius-1.0.0-pie.patch
-Patch6: freeradius-0.9.3-gcc34.patch
+Patch5: freeradius-1.1.1-pie.patch
 Patch8: freeradius-1.0.0-samba3.patch
-Patch10: freeradius-1.0.4-build.patch
-Patch11: freeradius-1.0.4-realloc-return.patch
+Patch10: freeradius-1.1.1-build.patch
 
 %description
 The FreeRADIUS Server Project is a high performance and highly configurable 
@@ -40,76 +41,40 @@ Summary: MySQL bindings for freeradius
 Group: System Environment/Daemons
 Requires: %{name} = %{version}-%{release}
 Requires: mysql
+BuildRequires: mysql-devel
 
 %description mysql
-The FreeRADIUS Server Project is a high performance and highly configurable 
-GPL'd free RADIUS server. The server is similar in some respects to 
-Livingston's 2.0 server.  While FreeRADIUS started as a variant of the 
-Cistron RADIUS server, they don't share a lot in common any more. It now has 
-many more features than Cistron or Livingston, and is much more configurable.
-
-FreeRADIUS is an Internet authentication daemon, which implements the RADIUS 
-protocol, as defined in RFC 2865 (and others). It allows Network Access 
-Servers (NAS boxes) to perform authentication for dial-up users. There are 
-also RADIUS clients available for Web servers, firewalls, Unix logins, and 
-more.  Using RADIUS allows authentication and authorization for a network to 
-be centralized, and minimizes the amount of re-configuration which has to be 
-done when adding or deleting new users.
+This plugin provides the MySQL bindings for the FreeRADIUS server project.
 
 %package postgresql
 Summary: postgresql bindings for freeradius
 Group: System Environment/Daemons
 Requires: %{name} = %{version}-%{release}
 Requires: postgresql
+BuildRequires: postgresql-devel
 
 %description postgresql
-The FreeRADIUS Server Project is a high performance and highly configurable 
-GPL'd free RADIUS server. The server is similar in some respects to 
-Livingston's 2.0 server.  While FreeRADIUS started as a variant of the 
-Cistron RADIUS server, they don't share a lot in common any more. It now has 
-many more features than Cistron or Livingston, and is much more configurable.
-
-FreeRADIUS is an Internet authentication daemon, which implements the RADIUS 
-protocol, as defined in RFC 2865 (and others). It allows Network Access 
-Servers (NAS boxes) to perform authentication for dial-up users. There are 
-also RADIUS clients available for Web servers, firewalls, Unix logins, and 
-more.  Using RADIUS allows authentication and authorization for a network to 
-be centralized, and minimizes the amount of re-configuration which has to be 
-done when adding or deleting new users.
+This plugin provides the postgresql bindings for the FreeRADIUS server project.
 
 %package unixODBC
 Summary: unixODBC bindings for freeradius
 Group: System Environment/Daemons
 Requires: %{name} = %{version}-%{release}
 Requires: unixODBC
+BuildRequires: unixODBC-devel
 
 %description unixODBC
-The FreeRADIUS Server Project is a high performance and highly configurable 
-GPL'd free RADIUS server. The server is similar in some respects to 
-Livingston's 2.0 server.  While FreeRADIUS started as a variant of the 
-Cistron RADIUS server, they don't share a lot in common any more. It now has 
-many more features than Cistron or Livingston, and is much more configurable.
-
-FreeRADIUS is an Internet authentication daemon, which implements the RADIUS 
-protocol, as defined in RFC 2865 (and others). It allows Network Access 
-Servers (NAS boxes) to perform authentication for dial-up users. There are 
-also RADIUS clients available for Web servers, firewalls, Unix logins, and 
-more.  Using RADIUS allows authentication and authorization for a network to 
-be centralized, and minimizes the amount of re-configuration which has to be 
-done when adding or deleting new users.
+This plugin provides the unixODBC bindings for the FreeRADIUS server project.
 
 
 %prep
 %setup -q 
 %patch1 -p1 -b .ltdl_no_la
-%patch2 -p1 -b .libdir
 %patch3 -p1 -b .pam-multilib
 %patch4 -p1 -b .com_err
 %patch5 -p1 -b .pie
-%patch6 -p1 -b .gcc34
 %patch8 -p1 -b .samba3
 %patch10 -p1 -b .build
-%patch11 -p1 -b .realloc-return
 
 
 %build
@@ -118,8 +83,12 @@ export CFLAGS="$RPM_OPT_FLAGS -fPIC"
 %else
 export CFLAGS="$RPM_OPT_FLAGS -fpic"
 %endif
+
+# bad fix for libtool: clear buildroot early, set LDFLAGS to buildroot libdir
+rm -rf $RPM_BUILD_ROOT
+export LDFLAGS="-L${RPM_BUILD_ROOT}%{_libdir}"
+
 %configure \
-	--enable-shared --disable-static \
 	--with-gnu-ld \
 	--with-threads \
 	--with-thread-pool \
@@ -129,9 +98,6 @@ export CFLAGS="$RPM_OPT_FLAGS -fpic"
 	--with-mysql-lib-dir=%{_libdir}/mysql \
 	--with-rlm-dbm-lib-dir=%{_libdir} \
 	--with-rlm-krb5-include-dir=/usr/kerberos/include
-%if "%{_lib}" == "lib64"
-perl -pi -e 's:sys_lib_search_path_spec=.*:sys_lib_search_path_spec="/lib64 /usr/lib64 /usr/local/lib64":' libtool
-%endif
 
 make
 
@@ -139,7 +105,10 @@ make
 %install
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/etc/{logrotate.d,pam.d,rc.d/init.d}
-%makeinstall
+
+# fix for bad libtool bug - can not rebuild dependent libs and bins
+export LD_LIBRARY_PATH=$RPM_BUILD_ROOT/%{_libdir}
+make install R=$RPM_BUILD_ROOT
 
 RADDB=$RPM_BUILD_ROOT/etc/raddb
 # set radiusd as default user/group
@@ -152,8 +121,6 @@ install -m 755 redhat/rc.radiusd-redhat $RPM_BUILD_ROOT/etc/rc.d/init.d/radiusd
 install -m 644 redhat/radiusd-logrotate $RPM_BUILD_ROOT/etc/logrotate.d/radiusd
 install -m 644 redhat/radiusd-pam $RPM_BUILD_ROOT/etc/pam.d/radiusd
 
-install -m 644 src/modules/rlm_sql/drivers/rlm_sql_*/*.sql $RPM_BUILD_ROOT%{_docdir}/freeradius-%{version}*/
-
 # remove unwanted rc.radiusd
 rm -f $RPM_BUILD_ROOT%{_prefix}/sbin/rc.radiusd
 
@@ -164,6 +131,10 @@ mkdir -p $RPM_BUILD_ROOT/var/log/radius
 touch $RPM_BUILD_ROOT/var/log/radius/{radutmp,radwtmp,radius.log}
 mkdir -p $RPM_BUILD_ROOT/var/log/radius/radacct
 mkdir -p $RPM_BUILD_ROOT/var/run/radiusd
+
+# remove unsupported config files
+rm -f $RPM_BUILD_ROOT/etc/raddb/oraclesql.conf
+rm -f $RPM_BUILD_ROOT/etc/raddb/experimental.conf
 
 
 %clean
@@ -180,7 +151,7 @@ if [ $1 = 1 ]; then
   /sbin/chkconfig --add radiusd
 fi
 for i in /var/log/radius/{radutmp,radwtmp,radius.log}; do
-  /bin/touch $i && /bin/chown radiusd: $i && /bin/chmod 600 $i
+  /bin/touch $i && /bin/chown radiusd $i && /bin/chmod 600 $i
 done
 
 
@@ -203,8 +174,28 @@ fi
 %config (noreplace) /etc/pam.d/radiusd
 %config (noreplace) /etc/logrotate.d/radiusd
 %config (noreplace) /etc/rc.d/init.d/radiusd
-%config (noreplace) /etc/raddb/[a-ce-z]*
-%config /etc/raddb/dictionary*
+%dir /etc/raddb
+%config (noreplace) /etc/raddb/acct_users
+%config (noreplace) /etc/raddb/attrs
+%config (noreplace) /etc/raddb/certs
+%config (noreplace) /etc/raddb/clients
+%config (noreplace) /etc/raddb/clients.conf
+%config (noreplace) /etc/raddb/dictionary
+%config (noreplace) /etc/raddb/eap.conf
+%config (noreplace) /etc/raddb/example.pl
+%config (noreplace) /etc/raddb/hints
+%config (noreplace) /etc/raddb/huntgroups
+%config (noreplace) /etc/raddb/ldap.attrmap
+%config (noreplace) /etc/raddb/naslist
+%config (noreplace) /etc/raddb/naspasswd
+%config (noreplace) /etc/raddb/otp.conf
+%config (noreplace) /etc/raddb/otppasswd.sample
+%config (noreplace) /etc/raddb/preproxy_users
+%config (noreplace) /etc/raddb/proxy.conf
+%config (noreplace) /etc/raddb/radiusd.conf
+%config (noreplace) /etc/raddb/realms
+%config (noreplace) /etc/raddb/snmp.conf
+%config (noreplace) /etc/raddb/users
 %{_bindir}/*
 %{_libdir}/libeap*.so
 %{_libdir}/libradius*.so
@@ -218,7 +209,16 @@ fi
 %{_libdir}/rlm_dbm*.so
 %{_libdir}/rlm_detail*.so
 %{_libdir}/rlm_digest*.so
-%{_libdir}/rlm_eap*.so
+%{_libdir}/rlm_eap-*.so
+%{_libdir}/rlm_eap.so
+%{_libdir}/rlm_eap_gtc*.so
+%{_libdir}/rlm_eap_leap*.so
+%{_libdir}/rlm_eap_md5*.so
+%{_libdir}/rlm_eap_mschapv2*.so
+%{_libdir}/rlm_eap_peap*.so
+%{_libdir}/rlm_eap_sim*.so
+%{_libdir}/rlm_eap_tls*.so
+%{_libdir}/rlm_eap_ttls*.so
 %{_libdir}/rlm_exec*.so
 %{_libdir}/rlm_expr*.so
 %{_libdir}/rlm_fastusers*.so
@@ -228,15 +228,19 @@ fi
 %{_libdir}/rlm_ldap*.so
 %{_libdir}/rlm_mschap*.so
 %{_libdir}/rlm_ns_mta_md5*.so
+%{_libdir}/rlm_otp*.so
 %{_libdir}/rlm_pam*.so
 %{_libdir}/rlm_pap*.so
 %{_libdir}/rlm_passwd*.so
+%{_libdir}/rlm_perl*.so
 %{_libdir}/rlm_preprocess*.so
 %{_libdir}/rlm_radutmp*.so
 %{_libdir}/rlm_realm*.so
-%{_libdir}/rlm_sql*.so
+%{_libdir}/rlm_sql-%{version}.so
+%{_libdir}/rlm_sql.so
+%{_libdir}/rlm_sqlcounter*.so
+%{_libdir}/rlm_sql_log*.so
 %{_libdir}/rlm_unix*.so
-%{_libdir}/rlm_x99_token*.so
 %{_datadir}/freeradius
 %{_sbindir}/*
 %{_mandir}/man1/*.1*
@@ -251,18 +255,29 @@ fi
 
 %files mysql
 %defattr(-,root,root,-)
+/etc/raddb/sql.conf
 %{_libdir}/*_mysql*.so
 
 %files postgresql
 %defattr(-,root,root,-)
+/etc/raddb/postgresql.conf
 %{_libdir}/*_postgresql*.so
 
 %files unixODBC
 %defattr(-,root,root,-)
+/etc/raddb/mssql.conf
 %{_libdir}/*_unixodbc*.so
 
 
 %changelog
+* Wed May 31 2006 Thomas Woerner <twoerner@redhat.com> 1.1.1-1
+- new version 1.1.1
+- fixed incorrect rlm_sql globbing (#189095)
+  Thanks to Yanko Kaneti for the fix.
+- fixed chown syntax in post script (#182777)
+- dropped gcc34, libdir and realloc-return patch
+- spec file cleanup with additional libtool build fixes
+
 * Fri Feb 10 2006 Jesse Keating <jkeating@redhat.com> - 1.0.5-1.2
 - bump again for double-long bug on ppc(64)
 
