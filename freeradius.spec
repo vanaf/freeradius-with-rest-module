@@ -1,6 +1,6 @@
 Summary: High-performance and highly configurable free RADIUS server.
 Name: freeradius
-Version: 1.1.1
+Version: 1.1.2
 Release: 1
 License: GPL
 Group: System Environment/Daemons
@@ -19,7 +19,7 @@ Patch3: freeradius-0.9.0-pam-multilib.patch
 Patch4: freeradius-0.9.0-com_err.patch
 Patch5: freeradius-1.1.1-pie.patch
 Patch8: freeradius-1.0.0-samba3.patch
-Patch10: freeradius-1.1.1-build.patch
+Patch10: freeradius-1.1.2-build.patch
 
 %description
 The FreeRADIUS Server Project is a high performance and highly configurable 
@@ -201,6 +201,7 @@ fi
 %config (noreplace) /etc/raddb/radiusd.conf
 %config (noreplace) /etc/raddb/realms
 %config (noreplace) /etc/raddb/snmp.conf
+%config (noreplace) /etc/raddb/sqlippool.conf
 %config (noreplace) /etc/raddb/users
 %{_bindir}/*
 %{_libdir}/libeap*.so
@@ -276,6 +277,9 @@ fi
 
 
 %changelog
+* Thu Jun  1 2006 Thomas Woerner <twoerner@redhat.com> 1.1.2-1
+- new version 1.1.2
+
 * Wed May 31 2006 Thomas Woerner <twoerner@redhat.com> 1.1.1-1
 - new version 1.1.1
 - fixed incorrect rlm_sql globbing (#189095)
