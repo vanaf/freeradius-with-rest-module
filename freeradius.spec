@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server.
 Name: freeradius
 Version: 1.1.2
-Release: 1.1
+Release: 2
 License: GPL
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -20,6 +20,7 @@ Patch4: freeradius-0.9.0-com_err.patch
 Patch5: freeradius-1.1.1-pie.patch
 Patch8: freeradius-1.0.0-samba3.patch
 Patch10: freeradius-1.1.2-build.patch
+Patch11: freeradius-1.1.2-no_sql_inc.patch
 
 %description
 The FreeRADIUS Server Project is a high performance and highly configurable 
@@ -75,6 +76,7 @@ This plugin provides the unixODBC bindings for the FreeRADIUS server project.
 %patch5 -p1 -b .pie
 %patch8 -p1 -b .samba3
 %patch10 -p1 -b .build
+%patch11 -p1 -b .no_sql_inc
 
 
 %build
@@ -277,6 +279,9 @@ fi
 
 
 %changelog
+* Tue Aug 15 2006 Thomas Woerner <twoerner@redhat.com> 1.1.2-2
+- commented out include for sql.conf in radiusd.conf (#202561)
+
 * Wed Jul 12 2006 Jesse Keating <jkeating@redhat.com> - 1.1.2-1.1
 - rebuild
 
