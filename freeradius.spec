@@ -1,11 +1,11 @@
 Summary: High-performance and highly configurable free RADIUS server.
 Name: freeradius
-Version: 1.1.2
-Release: 2
+Version: 1.1.3
+Release: 1
 License: GPL
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
-Source0: ftp://ftp.freeradius.org/pub/radius/%{name}-%{version}.tar.gz
+Source0: ftp://ftp.freeradius.org/pub/radius/%{name}-%{version}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Requires: chkconfig net-snmp krb5-libs net-snmp-utils
 BuildRequires: net-snmp-devel net-snmp-utils krb5-devel openldap-devel 
@@ -19,7 +19,7 @@ Patch3: freeradius-0.9.0-pam-multilib.patch
 Patch4: freeradius-0.9.0-com_err.patch
 Patch5: freeradius-1.1.1-pie.patch
 Patch8: freeradius-1.0.0-samba3.patch
-Patch10: freeradius-1.1.2-build.patch
+Patch10: freeradius-1.1.3-build.patch
 Patch11: freeradius-1.1.2-no_sql_inc.patch
 
 %description
@@ -95,6 +95,7 @@ export LDFLAGS="-L${RPM_BUILD_ROOT}%{_libdir}"
 	--with-threads \
 	--with-thread-pool \
  	--disable-ltdl-install \
+	--with-docdir=%{_docdir}/freeradius-%{version} \
 	--with-rlm-sql_postgresql-include-dir=/usr/include/pgsql \
 	--with-rlm-sql-postgresql-lib-dir=%{_libdir} \
 	--with-rlm-sql_mysql-include-dir=/usr/include/mysql \
@@ -178,7 +179,7 @@ fi
 
 %files
 %defattr(-,root,root,-)
-%doc %{_docdir}/freeradius-%{version}*/
+%doc %{_docdir}/freeradius-%{version}/
 %config (noreplace) /etc/pam.d/radiusd
 %config (noreplace) /etc/logrotate.d/radiusd
 %config (noreplace) /etc/rc.d/init.d/radiusd
@@ -279,6 +280,10 @@ fi
 
 
 %changelog
+* Tue Aug 15 2006 Thomas Woerner <twoerner@redhat.com> 1.1.3-1
+- new version 1.1.3 with lots of upstream bug fixes, some security fixes
+  (#205654)
+
 * Tue Aug 15 2006 Thomas Woerner <twoerner@redhat.com> 1.1.2-2
 - commented out include for sql.conf in radiusd.conf (#202561)
 

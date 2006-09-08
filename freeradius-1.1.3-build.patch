@@ -1,0 +1,13 @@
+--- freeradius-1.1.2/src/modules/rules.mak.build	2006-05-25 18:24:40.000000000 +0200
++++ freeradius-1.1.2/src/modules/rules.mak	2006-06-01 16:12:49.000000000 +0200
+@@ -113,8 +113,8 @@
+ $(TARGET).la: $(LT_OBJS)
+ 	$(LIBTOOL) --mode=link $(CC) -release $(RADIUSD_VERSION) \
+ 	-module $(LINK_MODE) $(LDFLAGS) $(RLM_LDFLAGS) -o $@     \
+-	-rpath $(libdir) $^ $(top_builddir)/src/lib/libradius.la \
+-	$(RLM_LIBS) $(LIBS)
++	-rpath $(libdir) $^ \
++	$(RLM_LIBS) -L$(libdir) $(LIBS)
+ 
+ #######################################################################
+ #
