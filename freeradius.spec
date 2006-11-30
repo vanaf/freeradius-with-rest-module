@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server.
 Name: freeradius
 Version: 1.1.3
-Release: 1
+Release: 2
 License: GPL
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -21,6 +21,7 @@ Patch5: freeradius-1.1.1-pie.patch
 Patch8: freeradius-1.0.0-samba3.patch
 Patch10: freeradius-1.1.3-build.patch
 Patch11: freeradius-1.1.2-no_sql_inc.patch
+Patch12: freeradius-1.1.3-ldap.patch
 
 %description
 The FreeRADIUS Server Project is a high performance and highly configurable 
@@ -77,6 +78,7 @@ This plugin provides the unixODBC bindings for the FreeRADIUS server project.
 %patch8 -p1 -b .samba3
 %patch10 -p1 -b .build
 %patch11 -p1 -b .no_sql_inc
+%patch12 -p1 -b .ldap
 
 
 %build
@@ -280,6 +282,10 @@ fi
 
 
 %changelog
+* Thu Nov 30 2006 Thomas Woerner <twoerner@redhat.com> 1.1.3-2
+- fixed ldap code to not use internals, added LDAP_DEPRECATED compile time flag
+  (#210912)
+
 * Tue Aug 15 2006 Thomas Woerner <twoerner@redhat.com> 1.1.3-1
 - new version 1.1.3 with lots of upstream bug fixes, some security fixes
   (#205654)
