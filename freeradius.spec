@@ -83,9 +83,9 @@ This plugin provides the unixODBC bindings for the FreeRADIUS server project.
 
 %build
 %ifarch s390 s390x
-export CFLAGS="$RPM_OPT_FLAGS -fPIC"
+export CFLAGS="$RPM_OPT_FLAGS -fPIC -DLDAP_DEPRECATED"
 %else
-export CFLAGS="$RPM_OPT_FLAGS -fpic"
+export CFLAGS="$RPM_OPT_FLAGS -fpic -DLDAP_DEPRECATED"
 %endif
 
 # bad fix for libtool: clear buildroot early, set LDFLAGS to buildroot libdir
