@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server.
 Name: freeradius
 Version: 1.1.3
-Release: 2
+Release: 2.1
 License: GPL
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -282,6 +282,9 @@ fi
 
 
 %changelog
+* Fri Dec  8 2006 Thomas Woerner <twoerner@redhat.com> 1.1.3-2.1
+- rebuild for new postgresql library version
+
 * Thu Nov 30 2006 Thomas Woerner <twoerner@redhat.com> 1.1.3-2
 - fixed ldap code to not use internals, added LDAP_DEPRECATED compile time flag
   (#210912)
