@@ -1,19 +1,22 @@
-Summary: High-performance and highly configurable free RADIUS server.
+Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
 Version: 1.1.3
-Release: 2.1
+Release: 3
 License: GPL
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
 Source0: ftp://ftp.freeradius.org/pub/radius/%{name}-%{version}.tar.bz2
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
-Requires: chkconfig net-snmp krb5-libs net-snmp-utils
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+Requires: net-snmp krb5-libs net-snmp-utils
 BuildRequires: net-snmp-devel net-snmp-utils krb5-devel openldap-devel 
 BuildRequires: openssl-devel pam-devel
 BuildRequires: libtool-ltdl-devel libtool
 BuildRequires: gdbm-devel zlib-devel
-BuildRequires: perl
-PreReq: shadow-utils
+#BuildRequires: perl
+Requires(pre): shadow-utils
+Requires(post): /sbin/ldconfig /sbin/chkconfig
+Requires(postun): /sbin/ldconfig
+Requires(preun): /sbin/chkconfig
 Patch1: freeradius-1.0.0-ltdl_no_la.patch
 Patch3: freeradius-0.9.0-pam-multilib.patch
 Patch4: freeradius-0.9.0-com_err.patch
@@ -110,27 +113,28 @@ export LDFLAGS="-L${RPM_BUILD_ROOT}%{_libdir}"
 perl -pi -e 's:sys_lib_search_path_spec=.*:sys_lib_search_path_spec="/lib64 /usr/lib64 /usr/local/lib64":' libtool
 %endif
 
-make
+# Makefile not smp save
+make #%{?_smp_mflags}
 
 
 %install
 rm -rf $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT/etc/{logrotate.d,pam.d,rc.d/init.d}
+mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/{logrotate.d,pam.d,rc.d/init.d}
 
 # fix for bad libtool bug - can not rebuild dependent libs and bins
 export LD_LIBRARY_PATH=$RPM_BUILD_ROOT/%{_libdir}
 make install R=$RPM_BUILD_ROOT
 
-RADDB=$RPM_BUILD_ROOT/etc/raddb
+RADDB=$RPM_BUILD_ROOT/%{_sysconfdir}/raddb
 # set radiusd as default user/group
 perl -i -pe 's/^#user =.*$/user = radiusd/' $RADDB/radiusd.conf
 perl -i -pe 's/^#group =.*$/group = radiusd/' $RADDB/radiusd.conf
 # shadow password file MUST be defined on Linux
 perl -i -pe 's/#	shadow =/shadow =/' $RADDB/radiusd.conf
 
-install -m 755 redhat/rc.radiusd-redhat $RPM_BUILD_ROOT/etc/rc.d/init.d/radiusd
-install -m 644 redhat/radiusd-logrotate $RPM_BUILD_ROOT/etc/logrotate.d/radiusd
-install -m 644 redhat/radiusd-pam $RPM_BUILD_ROOT/etc/pam.d/radiusd
+install -m 755 redhat/rc.radiusd-redhat $RPM_BUILD_ROOT/%{_initrddir}/radiusd
+install -m 644 redhat/radiusd-logrotate $RPM_BUILD_ROOT/%{_sysconfdir}/logrotate.d/radiusd
+install -m 644 redhat/radiusd-pam $RPM_BUILD_ROOT/%{_sysconfdir}/pam.d/radiusd
 
 # remove unwanted rc.radiusd
 rm -f $RPM_BUILD_ROOT%{_prefix}/sbin/rc.radiusd
@@ -144,8 +148,8 @@ mkdir -p $RPM_BUILD_ROOT/var/log/radius/radacct
 mkdir -p $RPM_BUILD_ROOT/var/run/radiusd
 
 # remove unsupported config files
-rm -f $RPM_BUILD_ROOT/etc/raddb/oraclesql.conf
-rm -f $RPM_BUILD_ROOT/etc/raddb/experimental.conf
+rm -f $RPM_BUILD_ROOT/%{_sysconfdir}/raddb/oraclesql.conf
+rm -f $RPM_BUILD_ROOT/%{_sysconfdir}/raddb/experimental.conf
 
 
 %clean
@@ -182,32 +186,32 @@ fi
 %files
 %defattr(-,root,root,-)
 %doc %{_docdir}/freeradius-%{version}/
-%config (noreplace) /etc/pam.d/radiusd
-%config (noreplace) /etc/logrotate.d/radiusd
-%config (noreplace) /etc/rc.d/init.d/radiusd
-%dir /etc/raddb
-%config (noreplace) /etc/raddb/acct_users
-%config (noreplace) /etc/raddb/attrs
-%config (noreplace) /etc/raddb/certs
-%config (noreplace) /etc/raddb/clients
-%config (noreplace) /etc/raddb/clients.conf
-%config (noreplace) /etc/raddb/dictionary
-%config (noreplace) /etc/raddb/eap.conf
-%config (noreplace) /etc/raddb/example.pl
-%config (noreplace) /etc/raddb/hints
-%config (noreplace) /etc/raddb/huntgroups
-%config (noreplace) /etc/raddb/ldap.attrmap
-%config (noreplace) /etc/raddb/naslist
-%config (noreplace) /etc/raddb/naspasswd
-%config (noreplace) /etc/raddb/otp.conf
-%config (noreplace) /etc/raddb/otppasswd.sample
-%config (noreplace) /etc/raddb/preproxy_users
-%config (noreplace) /etc/raddb/proxy.conf
-%config (noreplace) /etc/raddb/radiusd.conf
-%config (noreplace) /etc/raddb/realms
-%config (noreplace) /etc/raddb/snmp.conf
-%config (noreplace) /etc/raddb/sqlippool.conf
-%config (noreplace) /etc/raddb/users
+%config (noreplace) %{_sysconfdir}/pam.d/radiusd
+%config (noreplace) %{_sysconfdir}/logrotate.d/radiusd
+%config (noreplace) %{_initrddir}/radiusd
+%dir %{_sysconfdir}/raddb
+%config (noreplace) %{_sysconfdir}/raddb/acct_users
+%config (noreplace) %{_sysconfdir}/raddb/attrs
+%config (noreplace) %{_sysconfdir}/raddb/certs
+%config (noreplace) %{_sysconfdir}/raddb/clients
+%config (noreplace) %{_sysconfdir}/raddb/clients.conf
+%config (noreplace) %{_sysconfdir}/raddb/dictionary
+%config (noreplace) %{_sysconfdir}/raddb/eap.conf
+%config (noreplace) %{_sysconfdir}/raddb/example.pl
+%config (noreplace) %{_sysconfdir}/raddb/hints
+%config (noreplace) %{_sysconfdir}/raddb/huntgroups
+%config (noreplace) %{_sysconfdir}/raddb/ldap.attrmap
+%config (noreplace) %{_sysconfdir}/raddb/naslist
+%config (noreplace) %{_sysconfdir}/raddb/naspasswd
+%config (noreplace) %{_sysconfdir}/raddb/otp.conf
+%config (noreplace) %{_sysconfdir}/raddb/otppasswd.sample
+%config (noreplace) %{_sysconfdir}/raddb/preproxy_users
+%config (noreplace) %{_sysconfdir}/raddb/proxy.conf
+%config (noreplace) %{_sysconfdir}/raddb/radiusd.conf
+%config (noreplace) %{_sysconfdir}/raddb/realms
+%config (noreplace) %{_sysconfdir}/raddb/snmp.conf
+%config (noreplace) %{_sysconfdir}/raddb/sqlippool.conf
+%config (noreplace) %{_sysconfdir}/raddb/users
 %{_bindir}/*
 %{_libdir}/libeap*.so
 %{_libdir}/libradius*.so
@@ -267,21 +271,27 @@ fi
 
 %files mysql
 %defattr(-,root,root,-)
-/etc/raddb/sql.conf
+%{_sysconfdir}/raddb/sql.conf
 %{_libdir}/*_mysql*.so
 
 %files postgresql
 %defattr(-,root,root,-)
-/etc/raddb/postgresql.conf
+%{_sysconfdir}/raddb/postgresql.conf
 %{_libdir}/*_postgresql*.so
 
 %files unixODBC
 %defattr(-,root,root,-)
-/etc/raddb/mssql.conf
+%{_sysconfdir}/raddb/mssql.conf
 %{_libdir}/*_unixodbc*.so
 
 
 %changelog
+* Fri Feb 23 2007 Karsten Hopp <karsten@redhat.com> 1.1.3-3
+- remove trailing dot from summary
+- fix buildroot
+- fix post/postun/preun requirements
+- use rpm macros
+
 * Fri Dec  8 2006 Thomas Woerner <twoerner@redhat.com> 1.1.3-2.1
 - rebuild for new postgresql library version
 
