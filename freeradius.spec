@@ -202,7 +202,6 @@ fi
 %config (noreplace) %{_sysconfdir}/raddb/naslist
 %config (noreplace) %{_sysconfdir}/raddb/naspasswd
 %config (noreplace) %{_sysconfdir}/raddb/otp.conf
-%config (noreplace) %{_sysconfdir}/raddb/otppasswd.sample
 %config (noreplace) %{_sysconfdir}/raddb/preproxy_users
 %config (noreplace) %{_sysconfdir}/raddb/proxy.conf
 %config (noreplace) %{_sysconfdir}/raddb/radiusd.conf
