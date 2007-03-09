@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
-Version: 1.1.3
-Release: 3
+Version: 1.1.5
+Release: 1
 License: GPL
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -12,7 +12,7 @@ BuildRequires: net-snmp-devel net-snmp-utils krb5-devel openldap-devel
 BuildRequires: openssl-devel pam-devel
 BuildRequires: libtool-ltdl-devel libtool
 BuildRequires: gdbm-devel zlib-devel
-#BuildRequires: perl
+BuildRequires: perl-devel
 Requires(pre): shadow-utils
 Requires(post): /sbin/ldconfig /sbin/chkconfig
 Requires(postun): /sbin/ldconfig
@@ -20,7 +20,6 @@ Requires(preun): /sbin/chkconfig
 Patch1: freeradius-1.0.0-ltdl_no_la.patch
 Patch3: freeradius-0.9.0-pam-multilib.patch
 Patch4: freeradius-0.9.0-com_err.patch
-Patch5: freeradius-1.1.1-pie.patch
 Patch8: freeradius-1.0.0-samba3.patch
 Patch10: freeradius-1.1.3-build.patch
 Patch11: freeradius-1.1.2-no_sql_inc.patch
@@ -77,7 +76,6 @@ This plugin provides the unixODBC bindings for the FreeRADIUS server project.
 %patch1 -p1 -b .ltdl_no_la
 %patch3 -p1 -b .pam-multilib
 %patch4 -p1 -b .com_err
-%patch5 -p1 -b .pie
 %patch8 -p1 -b .samba3
 %patch10 -p1 -b .build
 %patch11 -p1 -b .no_sql_inc
@@ -286,6 +284,12 @@ fi
 
 
 %changelog
+* Fri Mar  9 2007 Thomas Woerner <twoerner@redhat.com> 1.1.5-1
+- new version 1.1.5
+  - no /etc/raddb/otppasswd.sample anymore
+  - build is pie by default, dropped pie patch
+- fixed build requirement for perl (perl-devel)
+
 * Fri Feb 23 2007 Karsten Hopp <karsten@redhat.com> 1.1.3-3
 - remove trailing dot from summary
 - fix buildroot
