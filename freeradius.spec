@@ -2,7 +2,7 @@ Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
 Version: 1.1.7
 Release: 1%{?dist}
-License: GPL
+License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
 Source0: ftp://ftp.freeradius.org/pub/radius/%{name}-%{version}.tar.bz2
@@ -25,6 +25,7 @@ Patch10: freeradius-1.1.3-build.patch
 Patch11: freeradius-1.1.2-no_sql_inc.patch
 Patch12: freeradius-1.1.7-ldap.patch
 Patch13: freeradius-1.1.7-db_dir.patch
+Patch14: freeradius-1.1.7-lsb.patch
 
 %description
 The FreeRADIUS Server Project is a high performance and highly configurable 
@@ -82,6 +83,7 @@ This plugin provides the unixODBC bindings for the FreeRADIUS server project.
 %patch11 -p1 -b .no_sql_inc
 %patch12 -p1 -b .ldap
 %patch13 -p1 -b .db_dir
+%patch14 -p1 -b .lsb
 
 
 %build
@@ -299,6 +301,10 @@ fi
 
 
 %changelog
+* Tue Aug 28 2007 Thomas Woerner <twoerner@redhat.com> 1.1.7-2
+- fixed initscript for LSB (rhbz#243671, rhbz#243928)
+- fixed license tag
+
 * Tue Aug  7 2007 Thomas Woerner <twoerner@redhat.com> 1.1.7-1
 - new versin 1.1.7
 - install snmp MIB files
