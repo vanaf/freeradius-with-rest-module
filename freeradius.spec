@@ -3,8 +3,8 @@
 # FIXME: check each former patch, do we still need any?
 Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
-Version: 2.0.5
-Release: 2%{?dist}
+Version: 2.1.1
+Release: 1%{?dist}
 License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -268,6 +268,8 @@ rm -rf $RPM_BUILD_ROOT/%{_datadir}/dialup_admin/sql/oracle
 rm -rf $RPM_BUILD_ROOT/%{_datadir}/dialup_admin/lib/sql/oracle
 rm -rf $RPM_BUILD_ROOT/%{_datadir}/dialup_admin/lib/sql/drivers/oracle
 
+# create links in /etc/raddb/sites-enabled to /etc/raddb/sites-available
+ln -s ../sites-available/control-socket $RADDB/sites-enabled/control-socket
 
 # remove unsupported config files
 rm -f $RPM_BUILD_ROOT/%{_sysconfdir}/raddb/experimental.conf
@@ -278,8 +280,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %pre
-/usr/sbin/useradd -M -o -r -d / -u 95 -c "radiusd user" -s /bin/false radiusd > /dev/null 2>&1 || :
-
+getent group  radiusd >/dev/null || /usr/sbin/groupadd -r -g 95 radiusd
+getent passwd radiusd >/dev/null || /usr/sbin/useradd  -r -g radiusd -u 95 -c "radiusd user" -s /sbin/nologin radiusd > /dev/null 2>&1
+exit 0
 
 %post
 /sbin/ldconfig
@@ -324,7 +327,6 @@ fi
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/preproxy_users
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/proxy.conf
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/radiusd.conf
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/snmp.conf
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/sql.conf
 %dir %attr(640,root,radiusd) /etc/raddb/sql
 #%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sql/oracle/*
@@ -351,6 +353,7 @@ fi
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/checkval
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/counter
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/detail
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/detail.example.com
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/detail.log
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/digest
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/echo
@@ -359,8 +362,10 @@ fi
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/expiration
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/expr
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/files
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/inner-eap
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/ippool
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/logintime
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/linelog
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/mac2ip
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/mac2vlan
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/mschap
@@ -375,12 +380,14 @@ fi
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/sql_log
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/sradutmp
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/unix
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/wimax
 %attr(700,radiusd,radiusd) %dir /var/run/radiusd/
 # binaries
 %defattr(-,root,root)
 /usr/sbin/checkrad
 /usr/sbin/radiusd
 /usr/sbin/radwatch
+/usr/sbin/radmin
 # man-pages
 %doc %{_mandir}/man1/*
 %doc %{_mandir}/man5/*
@@ -421,6 +428,8 @@ fi
 %{_libdir}/freeradius/rlm_detail-%{version}.so
 %{_libdir}/freeradius/rlm_digest.so
 %{_libdir}/freeradius/rlm_digest-%{version}.so
+%{_libdir}/freeradius/rlm_dynamic_clients.so
+%{_libdir}/freeradius/rlm_dynamic_clients-%{version}.so
 %{_libdir}/freeradius/rlm_eap.so
 %{_libdir}/freeradius/rlm_eap-%{version}.so
 %{_libdir}/freeradius/rlm_eap_gtc.so
@@ -451,6 +460,8 @@ fi
 %{_libdir}/freeradius/rlm_files-%{version}.so
 %{_libdir}/freeradius/rlm_ippool.so
 %{_libdir}/freeradius/rlm_ippool-%{version}.so
+%{_libdir}/freeradius/rlm_linelog.so
+%{_libdir}/freeradius/rlm_linelog-%{version}.so
 %{_libdir}/freeradius/rlm_logintime.so
 %{_libdir}/freeradius/rlm_logintime-%{version}.so
 %{_libdir}/freeradius/rlm_mschap.so
