@@ -585,6 +585,9 @@ fi
 %{_libdir}/freeradius/rlm_sql_unixodbc-%{version}.so
 
 %changelog
+* Thu Sep 25 2008 John Dennis <jdennis@redhat.com> - 2.1.1-1
+- upgrade to new upstream 2.1.1 release
+
 * Wed Jul 30 2008 John Dennis <jdennis@redhat.com> - 2.0.5-2
 - Resolves: bug #453761: FreeRADIUS %%post should not include chown -R
   specify file attributes for /etc/raddb/ldap.attrmap
