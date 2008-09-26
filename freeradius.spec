@@ -4,7 +4,7 @@
 Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
 Version: 2.1.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -332,7 +332,7 @@ fi
 #%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sql/oracle/*
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/users
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/otp.conf
-%dir %attr(750,root,radiusd) /etc/raddb/certs
+%dir %attr(770,root,radiusd) /etc/raddb/certs
 /etc/raddb/certs/Makefile
 /etc/raddb/certs/README
 /etc/raddb/certs/xpextensions
@@ -585,6 +585,10 @@ fi
 %{_libdir}/freeradius/rlm_sql_unixodbc-%{version}.so
 
 %changelog
+* Fri Sep 26 2008 John Dennis <jdennis@redhat.com> - 2.1.1-1
+- Resolves: bug #464119 bootstrap code could not create initial certs in /etc/raddb/certs because
+  permissions were 750, radiusd running as euid radiusd could not write there, permissions now 770
+
 * Thu Sep 25 2008 John Dennis <jdennis@redhat.com> - 2.1.1-1
 - upgrade to new upstream 2.1.1 release
 
