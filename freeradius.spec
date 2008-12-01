@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
 Version: 2.1.1
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -494,6 +494,9 @@ fi
 %{_libdir}/freeradius/rlm_sql_unixodbc-%{version}.so
 
 %changelog
+* Sun Nov 30 2008 Ignacio Vazquez-Abrams <ivazqueznet+rpm@gmail.com> - 2.1.1-4
+- Rebuild for Python 2.6
+
 * Fri Nov 21 2008 John Dennis <jdennis@redhat.com> - 2.1.1-3
 - make spec file buildable on RHEL5.2 by making perl-devel a fedora only dependency.
 - remove diaupadmin packages, it's not well supported and there are problems with it.
