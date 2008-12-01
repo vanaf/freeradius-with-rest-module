@@ -497,10 +497,10 @@ fi
 %{_libdir}/freeradius/rlm_sql_unixodbc-%{version}.so
 
 %changelog
-* Sat Nov 29 2008 John Dennis <jdennis@redhat.com> - 2.1.1-7
+* Mon Dec  1 2008 John Dennis <jdennis@redhat.com> - 2.1.1-7
 - add obsoletes tag for dialupadmin subpackages which were removed
 
-* Mon Nov 24 2008 John Dennis <jdennis@redhat.com> - 2.1.1-5
+* Mon Dec  1 2008 John Dennis <jdennis@redhat.com> - 2.1.1-7
 - add readline-devel BuildRequires
 
 * Sun Nov 30 2008 Ignacio Vazquez-Abrams <ivazqueznet+rpm@gmail.com> - 2.1.1-4
