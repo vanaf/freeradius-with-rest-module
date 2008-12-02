@@ -159,6 +159,7 @@ export CFLAGS="$RPM_OPT_FLAGS -fpic"
 
 %configure \
         --libdir=%{_libdir}/freeradius \
+        --with-system-libtool \
         --with-gnu-ld \
         --with-threads \
         --with-thread-pool \
