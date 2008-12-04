@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
 Version: 2.1.1
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -498,6 +498,10 @@ fi
 %{_libdir}/freeradius/rlm_sql_unixodbc-%{version}.so
 
 %changelog
+* Wed Dec  3 2008 John Dennis <jdennis@redhat.com> - 2.1.1-8
+- add --with-system-libtool to configure as a workaround for
+undefined reference to lt__PROGRAM__LTX_preloaded_symbols
+
 * Mon Dec  1 2008 John Dennis <jdennis@redhat.com> - 2.1.1-7
 - add obsoletes tag for dialupadmin subpackages which were removed
 
