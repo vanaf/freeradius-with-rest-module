@@ -1,19 +1,22 @@
 Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
 Version: 2.1.3
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
 
-Source0: ftp://ftp.freeradius.org/pub/radius/%{name}-server-%{version}.tar.bz2
+Source0: ftp://ftp.freeradius.org/pub/radius/freeradius-server-%{version}.tar.bz2
 Source100: freeradius-radiusd-init
 Source102: freeradius-logrotate
 Source103: freeradius-pam-conf
 
 Patch0: freeradius-radiusd-conf.patch
 
-Obsoletes: freeradius-dialupadmin freeradius-dialupadmin-ldap freeradius-dialupadmin-mysql freeradius-dialupadmin-postgresql
+Obsoletes: freeradius-dialupadmin >= 2.0 freeradius-dialupadmin-ldap >= 2.0
+Obsoletes: freeradius-dialupadmin-mysql >= 2.0 freeradius-dialupadmin-postgresql >= 2.0
+
+%define docdir %{_docdir}/freeradius-%{version}
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -149,7 +152,7 @@ This plugin provides the unixODBC support for the FreeRADIUS server project.
 
 
 %prep
-%setup -q -n %{name}-server-%{version}
+%setup -q -n freeradius-server-%{version}
 %patch0 -p1 -b .conf
 
 %build
@@ -166,7 +169,7 @@ export CFLAGS="$RPM_OPT_FLAGS -fpic"
         --with-gnu-ld \
         --with-threads \
         --with-thread-pool \
-        --with-docdir=%{_docdir}/freeradius-%{version} \
+        --with-docdir=%{docdir} \
         --with-rlm-sql_postgresql-include-dir=/usr/include/pgsql \
         --with-rlm-sql-postgresql-lib-dir=%{_libdir} \
         --with-rlm-sql_mysql-include-dir=/usr/include/mysql \
@@ -224,6 +227,17 @@ ln -s ../sites-available/control-socket $RADDB/sites-enabled/control-socket
 # remove unsupported config files
 rm -f $RPM_BUILD_ROOT/%{_sysconfdir}/raddb/experimental.conf
 
+# add Red Hat specific documentation
+cat >> $RPM_BUILD_ROOT/%{docdir}/REDHAT << EOF
+
+Red Hat, RHEL, Fedora, and CentOS specific information can be found on the
+FreeRADIUS Wiki in the Red Hat FAQ.
+
+http://wiki.freeradius.org/Red_Hat_FAQ
+
+Please reference that document.
+
+EOF
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -256,7 +270,7 @@ fi
 
 %files
 %defattr(-,root,root)
-%doc %{_docdir}/freeradius-%{version}/
+%doc %{docdir}/
 %config(noreplace) %{_sysconfdir}/pam.d/radiusd
 %config(noreplace) %{_sysconfdir}/logrotate.d/radiusd
 %config(noreplace) %{_initrddir}/radiusd
@@ -507,6 +521,9 @@ fi
 %{_libdir}/freeradius/rlm_sql_unixodbc-%{version}.so
 
 %changelog
+* Thu Feb 19 2009 John Dennis <jdennis@redhat.com> - 2.1.3-3
+- add pointer to Red Hat documentation in docdir
+
 * Sat Jan 24 2009 Caolán McNamara <caolanm@redhat.com> - 2.1.3-2
 - rebuild for dependencies
 
