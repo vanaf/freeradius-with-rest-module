@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
 Version: 2.1.3
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -12,6 +12,7 @@ Source102: freeradius-logrotate
 Source103: freeradius-pam-conf
 
 Patch0: freeradius-radiusd-conf.patch
+Patch1: freeradius-unixodbc-type-change.patch
 
 Obsoletes: freeradius-dialupadmin >= 2.0 freeradius-dialupadmin-ldap >= 2.0
 Obsoletes: freeradius-dialupadmin-mysql >= 2.0 freeradius-dialupadmin-postgresql >= 2.0
@@ -154,6 +155,7 @@ This plugin provides the unixODBC support for the FreeRADIUS server project.
 %prep
 %setup -q -n freeradius-server-%{version}
 %patch0 -p1 -b .conf
+%patch1 -p1 -b .unixodbc-type-change
 
 %build
 %ifarch s390 s390x
@@ -521,6 +523,9 @@ fi
 %{_libdir}/freeradius/rlm_sql_unixodbc-%{version}.so
 
 %changelog
+* Tue Feb 24 2009 John Dennis <jdennis@redhat.com> - 2.1.3-4
+- fix type usage in unixodbc to match new type usage in unixodbc API
+
 * Thu Feb 19 2009 John Dennis <jdennis@redhat.com> - 2.1.3-3
 - add pointer to Red Hat documentation in docdir
 
