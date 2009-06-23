@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
 Version: 2.1.6
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -29,7 +29,7 @@ BuildRequires: net-snmp-devel
 BuildRequires: net-snmp-utils
 BuildRequires: readline-devel
 
-Requires(pre): shadow-utils
+Requires(pre): shadow-utils glibc-common
 Requires(post): /sbin/ldconfig /sbin/chkconfig
 Requires(postun): /sbin/ldconfig
 Requires(preun): /sbin/chkconfig
@@ -237,10 +237,65 @@ EOF
 rm -rf $RPM_BUILD_ROOT
 
 
+
+# Make sure our user/group is present prior to any package or subpackage installation
 %pre
 getent group  radiusd >/dev/null || /usr/sbin/groupadd -r -g 95 radiusd
 getent passwd radiusd >/dev/null || /usr/sbin/useradd  -r -g radiusd -u 95 -c "radiusd user" -s /sbin/nologin radiusd > /dev/null 2>&1
 exit 0
+
+%pre devel
+getent group  radiusd >/dev/null || /usr/sbin/groupadd -r -g 95 radiusd
+getent passwd radiusd >/dev/null || /usr/sbin/useradd  -r -g radiusd -u 95 -c "radiusd user" -s /sbin/nologin radiusd > /dev/null 2>&1
+exit 0
+
+%pre krb5
+getent group  radiusd >/dev/null || /usr/sbin/groupadd -r -g 95 radiusd
+getent passwd radiusd >/dev/null || /usr/sbin/useradd  -r -g radiusd -u 95 -c "radiusd user" -s /sbin/nologin radiusd > /dev/null 2>&1
+exit 0
+
+%pre ldap
+getent group  radiusd >/dev/null || /usr/sbin/groupadd -r -g 95 radiusd
+getent passwd radiusd >/dev/null || /usr/sbin/useradd  -r -g radiusd -u 95 -c "radiusd user" -s /sbin/nologin radiusd > /dev/null 2>&1
+exit 0
+
+%pre libs
+getent group  radiusd >/dev/null || /usr/sbin/groupadd -r -g 95 radiusd
+getent passwd radiusd >/dev/null || /usr/sbin/useradd  -r -g radiusd -u 95 -c "radiusd user" -s /sbin/nologin radiusd > /dev/null 2>&1
+exit 0
+
+%pre mysql
+getent group  radiusd >/dev/null || /usr/sbin/groupadd -r -g 95 radiusd
+getent passwd radiusd >/dev/null || /usr/sbin/useradd  -r -g radiusd -u 95 -c "radiusd user" -s /sbin/nologin radiusd > /dev/null 2>&1
+exit 0
+
+%pre perl
+getent group  radiusd >/dev/null || /usr/sbin/groupadd -r -g 95 radiusd
+getent passwd radiusd >/dev/null || /usr/sbin/useradd  -r -g radiusd -u 95 -c "radiusd user" -s /sbin/nologin radiusd > /dev/null 2>&1
+exit 0
+
+%pre postgresql
+getent group  radiusd >/dev/null || /usr/sbin/groupadd -r -g 95 radiusd
+getent passwd radiusd >/dev/null || /usr/sbin/useradd  -r -g radiusd -u 95 -c "radiusd user" -s /sbin/nologin radiusd > /dev/null 2>&1
+exit 0
+
+%pre python
+getent group  radiusd >/dev/null || /usr/sbin/groupadd -r -g 95 radiusd
+getent passwd radiusd >/dev/null || /usr/sbin/useradd  -r -g radiusd -u 95 -c "radiusd user" -s /sbin/nologin radiusd > /dev/null 2>&1
+exit 0
+
+%pre unixODBC
+getent group  radiusd >/dev/null || /usr/sbin/groupadd -r -g 95 radiusd
+getent passwd radiusd >/dev/null || /usr/sbin/useradd  -r -g radiusd -u 95 -c "radiusd user" -s /sbin/nologin radiusd > /dev/null 2>&1
+exit 0
+
+%pre utils
+getent group  radiusd >/dev/null || /usr/sbin/groupadd -r -g 95 radiusd
+getent passwd radiusd >/dev/null || /usr/sbin/useradd  -r -g radiusd -u 95 -c "radiusd user" -s /sbin/nologin radiusd > /dev/null 2>&1
+exit 0
+
+
+
 
 %post
 /sbin/ldconfig
@@ -517,6 +572,9 @@ fi
 %{_libdir}/freeradius/rlm_sql_unixodbc-%{version}.so
 
 %changelog
+* Tue Jun 23 2009 John Dennis <jdennis@redhat.com> - 2.1.6-3
+- resolves bug #507571 freeradius packages do not check for user/group existence
+
 * Tue Jun  2 2009 John Dennis <jdennis@redhat.com> - 2.1.6-2
 - make /etc/raddb/sites-available/* be config(noreplace)
 
