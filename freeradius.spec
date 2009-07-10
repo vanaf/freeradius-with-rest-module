@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
 Version: 2.1.6
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -220,6 +220,11 @@ rm -rf $RPM_BUILD_ROOT/%{_datadir}/dialup_admin/lib/sql/drivers/oracle
 
 # remove unsupported config files
 rm -f $RPM_BUILD_ROOT/%{_sysconfdir}/raddb/experimental.conf
+
+# install doc files omitted by standard install
+for f in COPYRIGHT CREDITS INSTALL LICENSE README; do
+    cp $f $RPM_BUILD_ROOT/%{docdir}
+done
 
 # add Red Hat specific documentation
 cat >> $RPM_BUILD_ROOT/%{docdir}/REDHAT << EOF
@@ -572,6 +577,9 @@ fi
 %{_libdir}/freeradius/rlm_sql_unixodbc-%{version}.so
 
 %changelog
+* Fri Jul 10 2009 John Dennis <jdennis@redhat.com> - 2.1.6-4
+- install COPYRIGHT CREDITS INSTALL LICENSE README into docdir
+
 * Tue Jun 23 2009 John Dennis <jdennis@redhat.com> - 2.1.6-3
 - resolves bug #507571 freeradius packages do not check for user/group existence
 
