@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
-Version: 2.1.6
-Release: 6%{?dist}
+Version: 2.1.7
+Release: 1%{?dist}
 License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -28,6 +28,7 @@ BuildRequires: zlib-devel
 BuildRequires: net-snmp-devel
 BuildRequires: net-snmp-utils
 BuildRequires: readline-devel
+BuildRequires: libpcap-devel
 
 Requires(pre): shadow-utils glibc-common
 Requires(post): /sbin/ldconfig /sbin/chkconfig
@@ -35,18 +36,18 @@ Requires(postun): /sbin/ldconfig
 Requires(preun): /sbin/chkconfig
 
 %description
-The FreeRADIUS Server Project is a high performance and highly configurable 
-GPL'd free RADIUS server. The server is similar in some respects to 
-Livingston's 2.0 server.  While FreeRADIUS started as a variant of the 
-Cistron RADIUS server, they don't share a lot in common any more. It now has 
+The FreeRADIUS Server Project is a high performance and highly configurable
+GPL'd free RADIUS server. The server is similar in some respects to
+Livingston's 2.0 server.  While FreeRADIUS started as a variant of the
+Cistron RADIUS server, they don't share a lot in common any more. It now has
 many more features than Cistron or Livingston, and is much more configurable.
 
-FreeRADIUS is an Internet authentication daemon, which implements the RADIUS 
-protocol, as defined in RFC 2865 (and others). It allows Network Access 
-Servers (NAS boxes) to perform authentication for dial-up users. There are 
-also RADIUS clients available for Web servers, firewalls, Unix logins, and 
-more.  Using RADIUS allows authentication and authorization for a network to 
-be centralized, and minimizes the amount of re-configuration which has to be 
+FreeRADIUS is an Internet authentication daemon, which implements the RADIUS
+protocol, as defined in RFC 2865 (and others). It allows Network Access
+Servers (NAS boxes) to perform authentication for dial-up users. There are
+also RADIUS clients available for Web servers, firewalls, Unix logins, and
+more.  Using RADIUS allows authentication and authorization for a network to
+be centralized, and minimizes the amount of re-configuration which has to be
 done when adding or deleting new users.
 
 %package libs
@@ -60,6 +61,7 @@ The FreeRADIUS shared library
 Group: System Environment/Daemons
 Summary: FreeRADIUS utilities
 Requires: %{name}-libs = %{version}-%{release}
+Requires: libpcap >= 0.9.4
 
 %description utils
 The FreeRADIUS server has a number of features found in other servers,
@@ -174,6 +176,7 @@ export CFLAGS="$RPM_OPT_FLAGS -fpic"
         --with-unixodbc-lib-dir=%{_libdir} \
         --with-rlm-dbm-lib-dir=%{_libdir} \
         --with-rlm-krb5-include-dir=/usr/kerberos/include \
+        --with-modules="rlm_wimax" \
         --without-rlm_eap_ikev2 \
         --without-rlm_sql_iodbc \
         --without-rlm_sql_firebird \
@@ -372,6 +375,7 @@ fi
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/chap
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/checkval
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/counter
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/cui
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/detail
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/detail.example.com
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/detail.log
@@ -414,9 +418,36 @@ fi
 /usr/sbin/radwatch
 /usr/sbin/radmin
 # man-pages
-%doc %{_mandir}/man1/*
-%doc %{_mandir}/man5/*
-%doc %{_mandir}/man8/*
+%doc %{_mandir}/man5/acct_users.5.gz
+%doc %{_mandir}/man5/clients.conf.5.gz
+%doc %{_mandir}/man5/dictionary.5.gz
+%doc %{_mandir}/man5/radiusd.conf.5.gz
+%doc %{_mandir}/man5/radrelay.conf.5.gz
+%doc %{_mandir}/man5/rlm_acct_unique.5.gz
+%doc %{_mandir}/man5/rlm_always.5.gz
+%doc %{_mandir}/man5/rlm_attr_filter.5.gz
+%doc %{_mandir}/man5/rlm_attr_rewrite.5.gz
+%doc %{_mandir}/man5/rlm_chap.5.gz
+%doc %{_mandir}/man5/rlm_counter.5.gz
+%doc %{_mandir}/man5/rlm_detail.5.gz
+%doc %{_mandir}/man5/rlm_digest.5.gz
+%doc %{_mandir}/man5/rlm_expr.5.gz
+%doc %{_mandir}/man5/rlm_files.5.gz
+%doc %{_mandir}/man5/rlm_mschap.5.gz
+%doc %{_mandir}/man5/rlm_pap.5.gz
+%doc %{_mandir}/man5/rlm_passwd.5.gz
+%doc %{_mandir}/man5/rlm_policy.5.gz
+%doc %{_mandir}/man5/rlm_realm.5.gz
+%doc %{_mandir}/man5/rlm_sql.5.gz
+%doc %{_mandir}/man5/rlm_sql_log.5.gz
+%doc %{_mandir}/man5/rlm_unix.5.gz
+%doc %{_mandir}/man5/unlang.5.gz
+%doc %{_mandir}/man5/users.5.gz
+%doc %{_mandir}/man8/raddebug.8.gz
+%doc %{_mandir}/man8/radiusd.8.gz
+%doc %{_mandir}/man8/radmin.8.gz
+%doc %{_mandir}/man8/radrelay.8.gz
+%doc %{_mandir}/man8/radwatch.8.gz
 # dictionaries
 %dir %attr(755,root,root) /usr/share/freeradius
 /usr/share/freeradius/*
@@ -517,10 +548,21 @@ fi
 %{_libdir}/freeradius/rlm_sqlippool-%{version}.so
 %{_libdir}/freeradius/rlm_unix.so
 %{_libdir}/freeradius/rlm_unix-%{version}.so
+%{_libdir}/freeradius/rlm_wimax.so
+%{_libdir}/freeradius/rlm_wimax-%{version}.so
 
 %files utils
 %defattr(-,root,root)
 /usr/bin/*
+# man-pages
+%doc %{_mandir}/man1/radclient.1.gz
+%doc %{_mandir}/man1/radeapclient.1.gz
+%doc %{_mandir}/man1/radlast.1.gz
+%doc %{_mandir}/man1/radtest.1.gz
+%doc %{_mandir}/man1/radwho.1.gz
+%doc %{_mandir}/man1/radzap.1.gz
+%doc %{_mandir}/man8/radsqlrelay.8.gz
+%doc %{_mandir}/man8/rlm_ippool_tool.8.gz
 
 %files libs
 # RADIU shared libs
@@ -554,6 +596,8 @@ fi
 %defattr(-,root,root)
 %dir %attr(750,root,radiusd) /etc/raddb/sql/mysql
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/sql/mysql/*
+%dir %attr(750,root,radiusd) /etc/raddb/sql/ndb
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sql/ndb/*
 %{_libdir}/freeradius/rlm_sql_mysql.so
 %{_libdir}/freeradius/rlm_sql_mysql-%{version}.so
 
@@ -577,6 +621,87 @@ fi
 %{_libdir}/freeradius/rlm_sql_unixodbc-%{version}.so
 
 %changelog
+* Tue Sep 15 2009 John Dennis <jdennis@redhat.com> - 2.1.7-1
+- enable building of the rlm_wimax module
+- pcap wire analysis support is enabled and available in utils subpackage
+- Resolves bug #523053 radtest manpage in wrong package
+- update to latest upstream release, from upstream Changelog:
+  Feature improvements
+    * Full support for CoA and Disconnect packets as per RFC 3576
+      and RFC 5176.  Both receiving and proxying CoA is supported.
+    * Added "src_ipaddr" configuration to "home_server".  See
+      proxy.conf for details.
+    * radsniff now accepts -I, to read from a filename instead of
+      a device.
+    * radsniff also prints matching requests and any responses to those
+      requests when '-r' is used.
+    * Added example of attr_filter for Access-Challenge packets
+    * Added support for udpfromto in DHCP code
+    * radmin can now selectively mark modules alive/dead.
+      See "set module state".
+    * Added customizable messages on login success/fail.
+      See msg_goodpass && msg_badpass in log{} section of radiusd.conf
+    * Document "chase_referrals" and "rebind" in raddb/modules/ldap
+    * Preliminary implementation of DHCP relay.
+    * Made thread pool section optional.  If it doesn't exist,
+      the server will run single-threaded.
+    * Added sample radrelay.conf for people upgrading from 1.x
+    * Made proxying more stable by failing over, rather than
+      rejecting the first request.  See "response_window" in proxy.conf
+    * Allow home_server_pools to exist without realms.
+    * Add dictionary.iea (closes bug #7)
+    * Added support for RFC 5580
+    * Added experimental sql_freetds module from Gabriel Blanchard.
+    * Updated dictionary.foundry
+    * Added sample configuration for MySQL cluster in raddb/sql/ndb
+      See the README file for explanations.
+  Bug fixes
+    * Fixed corner case where proxied packets could have extra
+      character in User-Password attribute.  Fix from Niko Tyni.
+    * Extended size of "attribute" field in SQL to 64.
+    * Fixes to ruby module to be more careful about when it builds.
+    * Updated Perl module "configure" script to check for broken
+      Perl installations.
+    * Fix "status_check = none".  It would still send packets
+      in some cases.
+    * Set recursive flag on the proxy mutex, which enables safer
+      cleanup on some platforms.
+    * Copy the EAP username verbatim, rather than escaping it.
+    * Update handling so that robust-proxy-accounting works when
+      all home servers are down for extended periods of time.
+    * Look for DHCP option 53 anywhere in the packet, not just
+      at the start.
+    * Fix processing of proxy fail handler with virtual servers.
+    * DHCP code now prints out correct src/dst IP addresses
+      when sending packets.
+    * Removed requirement for DHCP to have clients
+    * Fixed handling of DHCP packets with message-type buried in the packet
+    * Fixed corner case with negation in unlang.
+    * Minor fixes to default MySQL & PostgreSQL schemas
+    * Suppress MSCHAP complaints in debugging mode.
+    * Fix SQL module for multiple instance, and possible crash on HUP
+    * Fix permissions for radius.log for sites that change user/group,
+      but which don't create the file before starting radiusd.
+    * Fix double counting of packets when proxying
+    * Make %%l work
+    * Fix pthread keys in rlm_perl
+    * Log reasons for EAP failure (closes bug #8)
+    * Load home servers and pools that aren't referenced from a realm.
+    * Handle return codes from virtual attributes in "unlang"
+      (e.g. LDAP-Group).  This makes "!(expr)" work for them.
+    * Enable VMPS to see contents of virtual server again
+    * Fix WiMAX module to be consistent with examples.  (closes bug #10)
+    * Fixed crash with policies dependent on NAS-Port comparisons
+    * Allowed vendor IDs to be be higher than 32767.
+    * Fix crash on startup with certain regexes in "hints" file.
+    * Fix crash in attr_filter module when packets don't exist
+    * Allow detail file reader to be faster when "load_factor = 100"
+    * Add work-around for build failures with errors related to
+      lt__PROGRAM__LTX_preloaded_symbols.  libltdl / libtool are horrible.
+    * Made ldap module "rebind" option aware of older, incompatible
+      versions of OpenLDAP.
+    * Check value of Fall-Through in attr_filter module.
+
 * Fri Aug 21 2009 Tomas Mraz <tmraz@redhat.com> - 2.1.6-6
 - rebuilt with new openssl
 
@@ -593,96 +718,95 @@ fi
 - make /etc/raddb/sites-available/* be config(noreplace)
 
 * Mon May 18 2009 John Dennis <jdennis@redhat.com> - 2.1.6-1
-  - update to latest upstream release, from upstream Changelog:
-    Feature improvements
-      * radclient exits with 0 on successful (accept / ack), and 1
-        otherwise (no response / reject)
-      * Added support for %%{sql:UPDATE ..}, and insert/delete
-        Patch from Arran Cudbard-Bell
-      * Added sample "do not respond" policy.  See raddb/policy.conf
-        and raddb/sites-available/do_not_respond
-      * Cleanups to Suse spec file from Norbert Wegener
-      * New VSAs for Juniper from Bjorn Mork
-      * Include more RFC dictionaries in the default install
-      * More documentation for the WiMAX module
-      * Added "chase_referrals" and "rebind" configuration to rlm_ldap.
-        This helps with Active Directory.  See raddb/modules/ldap
-      * Don't load pre/post-proxy if proxying is disabled.
-      * Added %%{md5:...}, which returns MD5 hash in hex.
-      * Added configurable "retry_interval" and "poll_interval"
-        for "detail" listeners.
-      * Added "delete_mppe_keys" configuration option to rlm_wimax.
-        Apparently some WiMAX clients misbehave when they see those keys.
-      * Added experimental rlm_ruby from
-        http://github.com/Antti/freeradius-server/tree/master
-      * Add Tunnel attributes to ldap.attrmap
-      * Enable virtual servers to be reloaded on HUP.  For now, only
-        the "authorize", "authenticate", etc. processing sections are
-        reloaded.  Clients and "listen" sections are NOT reloaded.
-      * Updated "radwatch" script to be more robust.  See scripts/radwatch
-      * Added certificate compatibility notes in raddb/certs/README,
-        for compatibility with different operating systems. (i.e. Windows)
-      * Permit multiple "-e" in radmin.
-      * Add support for originating CoA-Request and Disconnect-Request.
-        See raddb/sites-available/originate-coa.
-      * Added "lifetime" and "max_queries" to raddb/sql.conf.
-        This helps address the problem of hung SQL sockets.
-      * Allow packets to be injected via radmin.  See "inject help"
-        in radmin.
-      * Answer VMPS reconfirmation request.  Patch from Hermann Lauer.
-      * Sample logrotate script in scripts/logrotate.freeradius
-      * Add configurable poll interval for "detail" listeners
-      * New "raddebug" command.  This prints debugging information from
-        a running server.  See "man raddebug.
-      * Add "require_message_authenticator" configuration to home_server
-        configuration.  This makes the server add Message-Authenticator
-        to all outgoing Access-Request packets.
-      * Added smsotp module, as contributed by Siemens.
-      * Enabled the administration socket in the default install.
-        See raddb/sites-available/control-socket, and "man radmin"
-      * Handle duplicate clients, such as with replicated or
-        load-balanced SQL servers and "readclients = yes"
-
-    Bug fixes
-      * Minor changes to allow building without VQP.
-      * Minor fixes from John Center
-      * Fixed raddebug example
-      * Don't crash when deleting attributes via unlang
-      * Be friendlier to very fast clients
-      * Updated the "detail" listener so that it only polls once,
-        and not many times in a row, leaking memory each time...
-      * Update comparison for Packet-Src-IP-Address (etc.) so that
-        the operators other than '==' work.
-      * Did autoconf magic to work around weird libtool bug
-      * Make rlm_perl keep tags for tagged attributes in more situations
-      * Update UID checking for radmin
-      * Added "include_length" field for TTLS.  It's needed for RFC
-        compliance, but not (apparently) for interoperability.
-      * Clean up control sockets when they are closed, so that we don't
-        leak memory.
-      * Define SUN_LEN for systems that don't have it.
-      * Correct some boundary conditions in the conditional checker ("if")
-        in "unlang".  Bug noted by Arran Cudbard-Bell.
-      * Work around minor building issues in gmake.  This should only
-        have affected developers.
-      * Change how we manage unprivileged user/group, so that we do not
-        create control sockets owned by root.
-      * Fixed more minor issues found by Coverity.
-      * Allow raddb/certs/bootstrap to run when there is no "make"
-        command installed.
-      * In radiusd.conf, run_dir depends on the name of the program,
-        and isn't hard-coded to "..../radiusd"
-      * Check for EOF in more places in the "detail" file reader.
-      * Added Freeswitch dictionary.
-      * Chop ethernet frames in VMPS, rather than droppping packets.
-      * Fix EAP-TLS bug.  Patch from Arnaud Ebalard
-      * Don't lose string for regex-compares in the "users" file.
-      * Expose more functions in rlm_sql to rlm_sqlippool, which 
-        helps on systems where RTLD_GLOBAL is off.
-      * Fix typos in MySQL schemas for ippools.
-      * Remove macro that was causing build issues on some platforms.
-      * Fixed issues with dead home servers.  Bug noted by Chris Moules.
-      * Fixed "access after free" with some dynamic clients.
+- update to latest upstream release, from upstream Changelog:
+  Feature improvements
+    * radclient exits with 0 on successful (accept / ack), and 1
+      otherwise (no response / reject)
+    * Added support for %%{sql:UPDATE ..}, and insert/delete
+      Patch from Arran Cudbard-Bell
+    * Added sample "do not respond" policy.  See raddb/policy.conf
+      and raddb/sites-available/do_not_respond
+    * Cleanups to Suse spec file from Norbert Wegener
+    * New VSAs for Juniper from Bjorn Mork
+    * Include more RFC dictionaries in the default install
+    * More documentation for the WiMAX module
+    * Added "chase_referrals" and "rebind" configuration to rlm_ldap.
+      This helps with Active Directory.  See raddb/modules/ldap
+    * Don't load pre/post-proxy if proxying is disabled.
+    * Added %%{md5:...}, which returns MD5 hash in hex.
+    * Added configurable "retry_interval" and "poll_interval"
+      for "detail" listeners.
+    * Added "delete_mppe_keys" configuration option to rlm_wimax.
+      Apparently some WiMAX clients misbehave when they see those keys.
+    * Added experimental rlm_ruby from
+      http://github.com/Antti/freeradius-server/tree/master
+    * Add Tunnel attributes to ldap.attrmap
+    * Enable virtual servers to be reloaded on HUP.  For now, only
+      the "authorize", "authenticate", etc. processing sections are
+      reloaded.  Clients and "listen" sections are NOT reloaded.
+    * Updated "radwatch" script to be more robust.  See scripts/radwatch
+    * Added certificate compatibility notes in raddb/certs/README,
+      for compatibility with different operating systems. (i.e. Windows)
+    * Permit multiple "-e" in radmin.
+    * Add support for originating CoA-Request and Disconnect-Request.
+      See raddb/sites-available/originate-coa.
+    * Added "lifetime" and "max_queries" to raddb/sql.conf.
+      This helps address the problem of hung SQL sockets.
+    * Allow packets to be injected via radmin.  See "inject help"
+      in radmin.
+    * Answer VMPS reconfirmation request.  Patch from Hermann Lauer.
+    * Sample logrotate script in scripts/logrotate.freeradius
+    * Add configurable poll interval for "detail" listeners
+    * New "raddebug" command.  This prints debugging information from
+      a running server.  See "man raddebug.
+    * Add "require_message_authenticator" configuration to home_server
+      configuration.  This makes the server add Message-Authenticator
+      to all outgoing Access-Request packets.
+    * Added smsotp module, as contributed by Siemens.
+    * Enabled the administration socket in the default install.
+      See raddb/sites-available/control-socket, and "man radmin"
+    * Handle duplicate clients, such as with replicated or
+      load-balanced SQL servers and "readclients = yes"
+  Bug fixes
+    * Minor changes to allow building without VQP.
+    * Minor fixes from John Center
+    * Fixed raddebug example
+    * Don't crash when deleting attributes via unlang
+    * Be friendlier to very fast clients
+    * Updated the "detail" listener so that it only polls once,
+      and not many times in a row, leaking memory each time...
+    * Update comparison for Packet-Src-IP-Address (etc.) so that
+      the operators other than '==' work.
+    * Did autoconf magic to work around weird libtool bug
+    * Make rlm_perl keep tags for tagged attributes in more situations
+    * Update UID checking for radmin
+    * Added "include_length" field for TTLS.  It's needed for RFC
+      compliance, but not (apparently) for interoperability.
+    * Clean up control sockets when they are closed, so that we don't
+      leak memory.
+    * Define SUN_LEN for systems that don't have it.
+    * Correct some boundary conditions in the conditional checker ("if")
+      in "unlang".  Bug noted by Arran Cudbard-Bell.
+    * Work around minor building issues in gmake.  This should only
+      have affected developers.
+    * Change how we manage unprivileged user/group, so that we do not
+      create control sockets owned by root.
+    * Fixed more minor issues found by Coverity.
+    * Allow raddb/certs/bootstrap to run when there is no "make"
+      command installed.
+    * In radiusd.conf, run_dir depends on the name of the program,
+      and isn't hard-coded to "..../radiusd"
+    * Check for EOF in more places in the "detail" file reader.
+    * Added Freeswitch dictionary.
+    * Chop ethernet frames in VMPS, rather than droppping packets.
+    * Fix EAP-TLS bug.  Patch from Arnaud Ebalard
+    * Don't lose string for regex-compares in the "users" file.
+    * Expose more functions in rlm_sql to rlm_sqlippool, which
+      helps on systems where RTLD_GLOBAL is off.
+    * Fix typos in MySQL schemas for ippools.
+    * Remove macro that was causing build issues on some platforms.
+    * Fixed issues with dead home servers.  Bug noted by Chris Moules.
+    * Fixed "access after free" with some dynamic clients.
 
 - fix packaging bug, some directories missing execute permission
   /etc/raddb/dictionary now readable by all.
@@ -926,7 +1050,7 @@ undefined reference to lt__PROGRAM__LTX_preloaded_symbols
 - Other minor cleanups
 
 * Wed Aug 25 2004 Thomas Woerner <twoerner@redhat.com> 1.0.0-2.1
-- renamed /etc/pam.d/radius to /etc/pam.d/radiusd to match default 
+- renamed /etc/pam.d/radius to /etc/pam.d/radiusd to match default
   configuration (#130613)
 
 * Wed Aug 25 2004 Thomas Woerner <twoerner@redhat.com> 1.0.0-2
@@ -1012,5 +1136,5 @@ undefined reference to lt__PROGRAM__LTX_preloaded_symbols
 - create logging dir in post if it does not exist
 - fixed module load without la files
 
-* Thu Apr 17 2003 Thomas Woerner <twoerner@redhat.com> 
+* Thu Apr 17 2003 Thomas Woerner <twoerner@redhat.com>
 - Initial build.
