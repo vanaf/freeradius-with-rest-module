@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
 Version: 2.1.7
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -621,6 +621,9 @@ fi
 %{_libdir}/freeradius/rlm_sql_unixodbc-%{version}.so
 
 %changelog
+* Wed Sep 16 2009 Tomas Mraz <tmraz@redhat.com> - 2.1.7-2
+- use password-auth common PAM configuration instead of system-auth
+
 * Tue Sep 15 2009 John Dennis <jdennis@redhat.com> - 2.1.7-1
 - enable building of the rlm_wimax module
 - pcap wire analysis support is enabled and available in utils subpackage
