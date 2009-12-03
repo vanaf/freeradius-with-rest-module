@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
 Version: 2.1.7
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -15,6 +15,7 @@ Obsoletes: freeradius-dialupadmin >= 2.0 freeradius-dialupadmin-ldap >= 2.0
 Obsoletes: freeradius-dialupadmin-mysql >= 2.0 freeradius-dialupadmin-postgresql >= 2.0
 
 %define docdir %{_docdir}/freeradius-%{version}
+%define initddir %{?_initddir:%{_initddir}}%{!?_initddir:%{_initrddir}}
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -192,7 +193,8 @@ make
 %install
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/var/run/radiusd
-mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/{logrotate.d,pam.d,rc.d/init.d}
+mkdir -p $RPM_BUILD_ROOT/%{initddir}
+mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/{logrotate.d,pam.d}
 mkdir -p $RPM_BUILD_ROOT/var/lib/radiusd
 # fix for bad libtool bug - can not rebuild dependent libs and bins
 #FIXME export LD_LIBRARY_PATH=$RPM_BUILD_ROOT/%{_libdir}
@@ -206,7 +208,7 @@ perl -i -pe 's/^#group =.*$/group = radiusd/' $RADDB/radiusd.conf
 mkdir -p $RPM_BUILD_ROOT/var/log/radius/radacct
 touch $RPM_BUILD_ROOT/var/log/radius/{radutmp,radius.log}
 
-install -m 755 %{SOURCE100} $RPM_BUILD_ROOT/%{_initrddir}/radiusd
+install -m 755 %{SOURCE100} $RPM_BUILD_ROOT/%{initddir}/radiusd
 install -m 644 %{SOURCE102} $RPM_BUILD_ROOT/%{_sysconfdir}/logrotate.d/radiusd
 install -m 644 %{SOURCE103} $RPM_BUILD_ROOT/%{_sysconfdir}/pam.d/radiusd
 
@@ -330,7 +332,7 @@ fi
 %doc %{docdir}/
 %config(noreplace) %{_sysconfdir}/pam.d/radiusd
 %config(noreplace) %{_sysconfdir}/logrotate.d/radiusd
-%config(noreplace) %{_initrddir}/radiusd
+%config(noreplace) %{initddir}/radiusd
 %dir %attr(755,radiusd,radiusd) /var/lib/radiusd
 # configs
 %dir %attr(755,root,radiusd) /etc/raddb
@@ -409,7 +411,7 @@ fi
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/sradutmp
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/unix
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/wimax
-%dir %attr(700,radiusd,radiusd) /var/run/radiusd/
+%dir %attr(755,radiusd,radiusd) /var/run/radiusd/
 # binaries
 %defattr(-,root,root)
 /usr/sbin/checkrad
@@ -621,6 +623,11 @@ fi
 %{_libdir}/freeradius/rlm_sql_unixodbc-%{version}.so
 
 %changelog
+* Thu Dec  3 2009 John Dennis <jdennis@redhat.com> - 2.1.7-3
+- resolves: bug #522111 non-conformant initscript
+  also change permission of /var/run/radiusd from 0700 to 0755
+  so that "service radiusd status" can be run as non-root
+
 * Wed Sep 16 2009 Tomas Mraz <tmraz@redhat.com> - 2.1.7-2
 - use password-auth common PAM configuration instead of system-auth
 
