@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
 Version: 2.1.7
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -623,6 +623,9 @@ fi
 %{_libdir}/freeradius/rlm_sql_unixodbc-%{version}.so
 
 %changelog
+* Fri Dec  4 2009 Stepan Kasal <skasal@redhat.com> - 2.1.7-4
+- rebuild against perl 5.10.1
+
 * Thu Dec  3 2009 John Dennis <jdennis@redhat.com> - 2.1.7-3
 - resolves: bug #522111 non-conformant initscript
   also change permission of /var/run/radiusd from 0700 to 0755
