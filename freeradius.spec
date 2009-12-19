@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
 Version: 2.1.7
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -10,9 +10,6 @@ Source0: ftp://ftp.freeradius.org/pub/radius/freeradius-server-%{version}.tar.bz
 Source100: freeradius-radiusd-init
 Source102: freeradius-logrotate
 Source103: freeradius-pam-conf
-
-Obsoletes: freeradius-dialupadmin >= 2.0 freeradius-dialupadmin-ldap >= 2.0
-Obsoletes: freeradius-dialupadmin-mysql >= 2.0 freeradius-dialupadmin-postgresql >= 2.0
 
 %define docdir %{_docdir}/freeradius-%{version}
 %define initddir %{?_initddir:%{_initddir}}%{!?_initddir:%{_initrddir}}
@@ -134,7 +131,7 @@ BuildRequires: mysql-devel
 This plugin provides the MySQL support for the FreeRADIUS server project.
 
 %package postgresql
-Summary: postgresql support for freeradius
+Summary: Postgresql support for freeradius
 Group: System Environment/Daemons
 Requires: %{name}-libs = %{version}-%{release}
 BuildRequires: postgresql-devel
@@ -143,7 +140,7 @@ BuildRequires: postgresql-devel
 This plugin provides the postgresql support for the FreeRADIUS server project.
 
 %package unixODBC
-Summary: unixODBC support for freeradius
+Summary: Unix ODBC support for freeradius
 Group: System Environment/Daemons
 Requires: %{name}-libs = %{version}-%{release}
 BuildRequires: unixODBC-devel
@@ -332,7 +329,7 @@ fi
 %doc %{docdir}/
 %config(noreplace) %{_sysconfdir}/pam.d/radiusd
 %config(noreplace) %{_sysconfdir}/logrotate.d/radiusd
-%config(noreplace) %{initddir}/radiusd
+%{initddir}/radiusd
 %dir %attr(755,radiusd,radiusd) /var/lib/radiusd
 # configs
 %dir %attr(755,root,radiusd) /etc/raddb
@@ -355,9 +352,9 @@ fi
 #%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sql/oracle/*
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/users
 %dir %attr(770,root,radiusd) /etc/raddb/certs
-/etc/raddb/certs/Makefile
-/etc/raddb/certs/README
-/etc/raddb/certs/xpextensions
+%config(noreplace) /etc/raddb/certs/Makefile
+%config(noreplace) /etc/raddb/certs/README
+%config(noreplace) /etc/raddb/certs/xpextensions
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/certs/*.cnf
 %attr(750,root,radiusd) /etc/raddb/certs/bootstrap
 %dir %attr(750,root,radiusd) /etc/raddb/sites-available
@@ -365,9 +362,9 @@ fi
 %dir %attr(750,root,radiusd) /etc/raddb/sites-enabled
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/sites-enabled/*
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/eap.conf
-%attr(640,root,radiusd) /etc/raddb/example.pl
+%config(noreplace) %attr(640,root,radiusd) /etc/raddb/example.pl
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/policy.conf
-/etc/raddb/policy.txt
+%config(noreplace) /etc/raddb/policy.txt
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/templates.conf
 %dir %attr(750,root,radiusd) /etc/raddb/modules
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/acct_unique
@@ -456,8 +453,8 @@ fi
 # logs
 %dir %attr(700,radiusd,radiusd) /var/log/radius/
 %dir %attr(700,radiusd,radiusd) /var/log/radius/radacct/
-%attr(644,radiusd,radiusd) /var/log/radius/radutmp
-%config(noreplace) %attr(600,radiusd,radiusd) /var/log/radius/radius.log
+%ghost %attr(644,radiusd,radiusd) /var/log/radius/radutmp
+%ghost %attr(600,radiusd,radiusd) /var/log/radius/radius.log
 # RADIUS Loadable Modules
 %dir %attr(755,root,root) %{_libdir}/freeradius
 #%attr(755,root,root) %{_libdir}/freeradius/rlm_*.so*
@@ -575,7 +572,7 @@ fi
 %defattr(-,root,root)
 #%attr(644,root,root) %{_libdir}/freeradius/*.a
 #%attr(644,root,root) %{_libdir}/freeradius/*.la
-%dir %attr(755,radiusd,radiusd) /usr/include/freeradius
+%dir %attr(755,root,root) /usr/include/freeradius
 %attr(644,root,root) /usr/include/freeradius/*.h
 
 %files krb5
