@@ -31,8 +31,7 @@ BuildRequires: readline-devel
 BuildRequires: libpcap-devel
 
 Requires(pre): shadow-utils glibc-common
-Requires(post): /sbin/ldconfig /sbin/chkconfig
-Requires(postun): /sbin/ldconfig
+Requires(post): /sbin/chkconfig
 Requires(preun): /sbin/chkconfig
 
 %description
@@ -196,7 +195,6 @@ make install R=$RPM_BUILD_ROOT
 RADDB=$RPM_BUILD_ROOT%{_sysconfdir}/raddb
 perl -i -pe 's/^#user =.*$/user = radiusd/'   $RADDB/radiusd.conf
 perl -i -pe 's/^#group =.*$/group = radiusd/' $RADDB/radiusd.conf
-#ldconfig -n $RPM_BUILD_ROOT/usr/lib/freeradius
 # logs
 mkdir -p $RPM_BUILD_ROOT/var/log/radius/radacct
 touch $RPM_BUILD_ROOT/var/log/radius/{radutmp,radius.log}
@@ -296,7 +294,6 @@ exit 0
 
 
 %post
-/sbin/ldconfig
 if [ $1 = 1 ]; then
   /sbin/chkconfig --add radiusd
 fi
@@ -312,7 +309,6 @@ fi
 if [ $1 -ge 1 ]; then
   /sbin/service radiusd condrestart >/dev/null 2>&1 || :
 fi
-/sbin/ldconfig
 
 
 %files
@@ -615,6 +611,7 @@ fi
 - fix subpackage requires, change from freeradius-libs to main package
 - fix description of the devel subpackage, remove referene to non-shipped libs
 - remove execute permissions on src files included in debuginfo
+- remove unnecessary use of ldconfig
 
 * Mon Dec 21 2009 John Dennis <jdennis@redhat.com> - 2.1.7-5
 - fix various rpmlint issues.
