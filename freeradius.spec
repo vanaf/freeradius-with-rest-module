@@ -6,12 +6,12 @@ License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
 
-Obsoletes: freeradius-libs
-
 Source0: ftp://ftp.freeradius.org/pub/radius/freeradius-server-%{version}.tar.bz2
 Source100: freeradius-radiusd-init
 Source102: freeradius-logrotate
 Source103: freeradius-pam-conf
+
+Obsoletes: freeradius-libs
 
 %define docdir %{_docdir}/freeradius-%{version}
 %define initddir %{?_initddir:%{_initddir}}%{!?_initddir:%{_initrddir}}
@@ -95,10 +95,12 @@ Summary: Perl support for freeradius
 Group: System Environment/Daemons
 Requires: %{name} = %{version}-%{release}
 Requires: perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
-%if 0%{?fedora}
-BuildRequires: perl-devel
-%else
+%{?fedora:BuildRequires: perl-devel}
+%if 0%{?rhel} <= 5
 BuildRequires: perl
+%endif
+%if 0%{?rhel} >= 6
+BuildRequires: perl-devel
 %endif
 BuildRequires: perl(ExtUtils::Embed)
 
@@ -218,9 +220,11 @@ rm -rf $RPM_BUILD_ROOT/%{_datadir}/dialup_admin/lib/sql/drivers/oracle
 rm -f $RPM_BUILD_ROOT/%{_sysconfdir}/raddb/experimental.conf
 
 # install doc files omitted by standard install
-for f in COPYRIGHT CREDITS INSTALL LICENSE README; do
+for f in COPYRIGHT CREDITS INSTALL README; do
     cp $f $RPM_BUILD_ROOT/%{docdir}
 done
+cp LICENSE $RPM_BUILD_ROOT/%{docdir}/LICENSE.gpl
+cp src/lib/LICENSE $RPM_BUILD_ROOT/%{docdir}/LICENSE.lgpl
 
 # add Red Hat specific documentation
 cat >> $RPM_BUILD_ROOT/%{docdir}/REDHAT << EOF
@@ -244,54 +248,6 @@ rm -rf $RPM_BUILD_ROOT
 getent group  radiusd >/dev/null || /usr/sbin/groupadd -r -g 95 radiusd
 getent passwd radiusd >/dev/null || /usr/sbin/useradd  -r -g radiusd -u 95 -c "radiusd user" -s /sbin/nologin radiusd > /dev/null 2>&1
 exit 0
-
-%pre devel
-getent group  radiusd >/dev/null || /usr/sbin/groupadd -r -g 95 radiusd
-getent passwd radiusd >/dev/null || /usr/sbin/useradd  -r -g radiusd -u 95 -c "radiusd user" -s /sbin/nologin radiusd > /dev/null 2>&1
-exit 0
-
-%pre krb5
-getent group  radiusd >/dev/null || /usr/sbin/groupadd -r -g 95 radiusd
-getent passwd radiusd >/dev/null || /usr/sbin/useradd  -r -g radiusd -u 95 -c "radiusd user" -s /sbin/nologin radiusd > /dev/null 2>&1
-exit 0
-
-%pre ldap
-getent group  radiusd >/dev/null || /usr/sbin/groupadd -r -g 95 radiusd
-getent passwd radiusd >/dev/null || /usr/sbin/useradd  -r -g radiusd -u 95 -c "radiusd user" -s /sbin/nologin radiusd > /dev/null 2>&1
-exit 0
-
-%pre mysql
-getent group  radiusd >/dev/null || /usr/sbin/groupadd -r -g 95 radiusd
-getent passwd radiusd >/dev/null || /usr/sbin/useradd  -r -g radiusd -u 95 -c "radiusd user" -s /sbin/nologin radiusd > /dev/null 2>&1
-exit 0
-
-%pre perl
-getent group  radiusd >/dev/null || /usr/sbin/groupadd -r -g 95 radiusd
-getent passwd radiusd >/dev/null || /usr/sbin/useradd  -r -g radiusd -u 95 -c "radiusd user" -s /sbin/nologin radiusd > /dev/null 2>&1
-exit 0
-
-%pre postgresql
-getent group  radiusd >/dev/null || /usr/sbin/groupadd -r -g 95 radiusd
-getent passwd radiusd >/dev/null || /usr/sbin/useradd  -r -g radiusd -u 95 -c "radiusd user" -s /sbin/nologin radiusd > /dev/null 2>&1
-exit 0
-
-%pre python
-getent group  radiusd >/dev/null || /usr/sbin/groupadd -r -g 95 radiusd
-getent passwd radiusd >/dev/null || /usr/sbin/useradd  -r -g radiusd -u 95 -c "radiusd user" -s /sbin/nologin radiusd > /dev/null 2>&1
-exit 0
-
-%pre unixODBC
-getent group  radiusd >/dev/null || /usr/sbin/groupadd -r -g 95 radiusd
-getent passwd radiusd >/dev/null || /usr/sbin/useradd  -r -g radiusd -u 95 -c "radiusd user" -s /sbin/nologin radiusd > /dev/null 2>&1
-exit 0
-
-%pre utils
-getent group  radiusd >/dev/null || /usr/sbin/groupadd -r -g 95 radiusd
-getent passwd radiusd >/dev/null || /usr/sbin/useradd  -r -g radiusd -u 95 -c "radiusd user" -s /sbin/nologin radiusd > /dev/null 2>&1
-exit 0
-
-
-
 
 %post
 if [ $1 = 1 ]; then
@@ -612,6 +568,9 @@ fi
 - fix description of the devel subpackage, remove referene to non-shipped libs
 - remove execute permissions on src files included in debuginfo
 - remove unnecessary use of ldconfig
+- since all sub-packages now require main package remove user creation for sub-packages
+- also include the LGPL library license file in addition to the GPL license file
+- fix BuildRequires for perl so it's compatible with both Fedora, RHEL5 and RHEL6
 
 * Mon Dec 21 2009 John Dennis <jdennis@redhat.com> - 2.1.7-5
 - fix various rpmlint issues.
