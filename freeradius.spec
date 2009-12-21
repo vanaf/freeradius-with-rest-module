@@ -1,10 +1,12 @@
 Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
 Version: 2.1.7
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
+
+Obsoletes: freeradius-libs
 
 Source0: ftp://ftp.freeradius.org/pub/radius/freeradius-server-%{version}.tar.bz2
 Source100: freeradius-radiusd-init
@@ -48,17 +50,10 @@ more.  Using RADIUS allows authentication and authorization for a network to
 be centralized, and minimizes the amount of re-configuration which has to be
 done when adding or deleting new users.
 
-%package libs
-Group: System Environment/Daemons
-Summary: FreeRADIUS shared libraries
-
-%description libs
-The FreeRADIUS shared library
-
 %package utils
 Group: System Environment/Daemons
 Summary: FreeRADIUS utilities
-Requires: %{name}-libs = %{version}-%{release}
+Requires: %{name} = %{version}-%{release}
 Requires: libpcap >= 0.9.4
 
 %description utils
@@ -73,16 +68,15 @@ attributes Selecting a particular configuration Authentication methods
 %package devel
 Group: Development/Libraries
 Summary: FreeRADIUS Development Files
-Requires: %{name}-libs = %{version}-%{release}
+Requires: %{name} = %{version}-%{release}
 
 %description devel
-These are the static libraries for the FreeRADIUS package.
-
+Header files for the FreeRADIUS package.
 
 %package ldap
 Summary: LDAP support for freeradius
 Group: System Environment/Daemons
-Requires: %{name}-libs = %{version}-%{release}
+Requires: %{name} = %{version}-%{release}
 BuildRequires: openldap-devel
 
 %description ldap
@@ -91,7 +85,7 @@ This plugin provides the LDAP support for the FreeRADIUS server project.
 %package krb5
 Summary: Kerberos 5 support for freeradius
 Group: System Environment/Daemons
-Requires: %{name}-libs = %{version}-%{release}
+Requires: %{name} = %{version}-%{release}
 BuildRequires: krb5-devel
 
 %description krb5
@@ -100,7 +94,7 @@ This plugin provides the Kerberos 5 support for the FreeRADIUS server project.
 %package perl
 Summary: Perl support for freeradius
 Group: System Environment/Daemons
-Requires: %{name}-libs = %{version}-%{release}
+Requires: %{name} = %{version}-%{release}
 Requires: perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 %if 0%{?fedora}
 BuildRequires: perl-devel
@@ -115,7 +109,7 @@ This plugin provides the Perl support for the FreeRADIUS server project.
 %package python
 Summary: Python support for freeradius
 Group: System Environment/Daemons
-Requires: %{name}-libs = %{version}-%{release}
+Requires: %{name} = %{version}-%{release}
 BuildRequires: python-devel
 
 %description python
@@ -124,7 +118,7 @@ This plugin provides the Python support for the FreeRADIUS server project.
 %package mysql
 Summary: MySQL support for freeradius
 Group: System Environment/Daemons
-Requires: %{name}-libs = %{version}-%{release}
+Requires: %{name} = %{version}-%{release}
 BuildRequires: mysql-devel
 
 %description mysql
@@ -133,7 +127,7 @@ This plugin provides the MySQL support for the FreeRADIUS server project.
 %package postgresql
 Summary: Postgresql support for freeradius
 Group: System Environment/Daemons
-Requires: %{name}-libs = %{version}-%{release}
+Requires: %{name} = %{version}-%{release}
 BuildRequires: postgresql-devel
 
 %description postgresql
@@ -142,7 +136,7 @@ This plugin provides the postgresql support for the FreeRADIUS server project.
 %package unixODBC
 Summary: Unix ODBC support for freeradius
 Group: System Environment/Daemons
-Requires: %{name}-libs = %{version}-%{release}
+Requires: %{name} = %{version}-%{release}
 BuildRequires: unixODBC-devel
 
 %description unixODBC
@@ -151,6 +145,8 @@ This plugin provides the unixODBC support for the FreeRADIUS server project.
 
 %prep
 %setup -q -n freeradius-server-%{version}
+# Some source files mistakenly have execute permissions set
+find $RPM_BUILD_DIR/freeradius-server-%{version} \( -name '*.c' -o -name '*.h' \) -a -perm /0111 -exec chmod a-x {} +
 
 %build
 %ifarch s390 s390x
@@ -262,11 +258,6 @@ getent passwd radiusd >/dev/null || /usr/sbin/useradd  -r -g radiusd -u 95 -c "r
 exit 0
 
 %pre ldap
-getent group  radiusd >/dev/null || /usr/sbin/groupadd -r -g 95 radiusd
-getent passwd radiusd >/dev/null || /usr/sbin/useradd  -r -g radiusd -u 95 -c "radiusd user" -s /sbin/nologin radiusd > /dev/null 2>&1
-exit 0
-
-%pre libs
 getent group  radiusd >/dev/null || /usr/sbin/groupadd -r -g 95 radiusd
 getent passwd radiusd >/dev/null || /usr/sbin/useradd  -r -g radiusd -u 95 -c "radiusd user" -s /sbin/nologin radiusd > /dev/null 2>&1
 exit 0
@@ -455,6 +446,8 @@ fi
 %dir %attr(700,radiusd,radiusd) /var/log/radius/radacct/
 %ghost %attr(644,radiusd,radiusd) /var/log/radius/radutmp
 %ghost %attr(600,radiusd,radiusd) /var/log/radius/radius.log
+# RADIUS shared libs
+%attr(755,root,root) %{_libdir}/freeradius/lib*.so*
 # RADIUS Loadable Modules
 %dir %attr(755,root,root) %{_libdir}/freeradius
 #%attr(755,root,root) %{_libdir}/freeradius/rlm_*.so*
@@ -563,11 +556,6 @@ fi
 %doc %{_mandir}/man8/radsqlrelay.8.gz
 %doc %{_mandir}/man8/rlm_ippool_tool.8.gz
 
-%files libs
-# RADIU shared libs
-%defattr(-,root,root)
-%attr(755,root,root) %{_libdir}/freeradius/lib*.so*
-
 %files devel
 %defattr(-,root,root)
 #%attr(644,root,root) %{_libdir}/freeradius/*.a
@@ -620,6 +608,17 @@ fi
 %{_libdir}/freeradius/rlm_sql_unixodbc-%{version}.so
 
 %changelog
+* Mon Dec 21 2009 John Dennis <jdennis@redhat.com> - 2.1.7-6
+- more spec file clean up from review comments
+- remove freeradius-libs subpackage, move libfreeradius-eap and
+  libfreeradius-radius into the main package
+- fix subpackage requires, change from freeradius-libs to main package
+- fix description of the devel subpackage, remove referene to non-shipped libs
+- remove execute permissions on src files included in debuginfo
+
+* Mon Dec 21 2009 John Dennis <jdennis@redhat.com> - 2.1.7-5
+- fix various rpmlint issues.
+
 * Fri Dec  4 2009 Stepan Kasal <skasal@redhat.com> - 2.1.7-4
 - rebuild against perl 5.10.1
 
