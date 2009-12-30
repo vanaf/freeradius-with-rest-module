@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
 Version: 2.1.7
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -11,6 +11,7 @@ Source100: freeradius-radiusd-init
 Source102: freeradius-logrotate
 Source103: freeradius-pam-conf
 
+Obsoletes: freeradius-devel
 Obsoletes: freeradius-libs
 
 %define docdir %{_docdir}/freeradius-%{version}
@@ -63,14 +64,6 @@ of the server, and let you decide if they satisfy your needs.
 
 Support for RFC and VSA Attributes Additional server configuration
 attributes Selecting a particular configuration Authentication methods
-
-%package devel
-Group: Development/Libraries
-Summary: FreeRADIUS Development Files
-Requires: %{name} = %{version}-%{release}
-
-%description devel
-Header files for the FreeRADIUS package.
 
 %package ldap
 Summary: LDAP support for freeradius
@@ -187,8 +180,6 @@ make
 %install
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/var/run/radiusd
-mkdir -p $RPM_BUILD_ROOT/%{initddir}
-mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/{logrotate.d,pam.d}
 mkdir -p $RPM_BUILD_ROOT/var/lib/radiusd
 # fix for bad libtool bug - can not rebuild dependent libs and bins
 #FIXME export LD_LIBRARY_PATH=$RPM_BUILD_ROOT/%{_libdir}
@@ -201,9 +192,9 @@ perl -i -pe 's/^#group =.*$/group = radiusd/' $RADDB/radiusd.conf
 mkdir -p $RPM_BUILD_ROOT/var/log/radius/radacct
 touch $RPM_BUILD_ROOT/var/log/radius/{radutmp,radius.log}
 
-install -m 755 %{SOURCE100} $RPM_BUILD_ROOT/%{initddir}/radiusd
-install -m 644 %{SOURCE102} $RPM_BUILD_ROOT/%{_sysconfdir}/logrotate.d/radiusd
-install -m 644 %{SOURCE103} $RPM_BUILD_ROOT/%{_sysconfdir}/pam.d/radiusd
+install -D -m 755 %{SOURCE100} $RPM_BUILD_ROOT/%{initddir}/radiusd
+install -D -m 644 %{SOURCE102} $RPM_BUILD_ROOT/%{_sysconfdir}/logrotate.d/radiusd
+install -D -m 644 %{SOURCE103} $RPM_BUILD_ROOT/%{_sysconfdir}/pam.d/radiusd
 
 # remove unneeded stuff
 rm -rf doc/00-OLD
@@ -215,6 +206,10 @@ rm -rf $RPM_BUILD_ROOT/%{_sysconfdir}/raddb/sql/oracle
 rm -rf $RPM_BUILD_ROOT/%{_datadir}/dialup_admin/sql/oracle
 rm -rf $RPM_BUILD_ROOT/%{_datadir}/dialup_admin/lib/sql/oracle
 rm -rf $RPM_BUILD_ROOT/%{_datadir}/dialup_admin/lib/sql/drivers/oracle
+
+# remove header files, we don't ship a devel package and the 
+# headers have multilib conflicts
+rm -rf $RPM_BUILD_ROOT/%{_includedir}
 
 # remove unsupported config files
 rm -f $RPM_BUILD_ROOT/%{_sysconfdir}/raddb/experimental.conf
@@ -508,13 +503,6 @@ fi
 %doc %{_mandir}/man8/radsqlrelay.8.gz
 %doc %{_mandir}/man8/rlm_ippool_tool.8.gz
 
-%files devel
-%defattr(-,root,root)
-#%attr(644,root,root) %{_libdir}/freeradius/*.a
-#%attr(644,root,root) %{_libdir}/freeradius/*.la
-%dir %attr(755,root,root) /usr/include/freeradius
-%attr(644,root,root) /usr/include/freeradius/*.h
-
 %files krb5
 %defattr(-,root,root)
 %{_libdir}/freeradius/rlm_krb5.so
@@ -560,6 +548,10 @@ fi
 %{_libdir}/freeradius/rlm_sql_unixodbc-%{version}.so
 
 %changelog
+* Wed Dec 30 2009 John Dennis <jdennis@redhat.com> - 2.1.7-7
+- Remove devel subpackage. It doesn't make much sense to have a devel package since
+  we don't ship libraries and it produces multilib conflicts.
+
 * Mon Dec 21 2009 John Dennis <jdennis@redhat.com> - 2.1.7-6
 - more spec file clean up from review comments
 - remove freeradius-libs subpackage, move libfreeradius-eap and
