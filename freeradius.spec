@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
 Version: 2.1.9
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -557,6 +557,9 @@ fi
 %{_libdir}/freeradius/rlm_sql_unixodbc-%{version}.so
 
 %changelog
+* Tue Jun 01 2010 Marcela Maslanova <mmaslano@redhat.com> - 2.1.9-2
+- Mass rebuild with perl-5.12.0
+
 * Mon May 24 2010 John Dennis <jdennis@redhat.com> - 2.1.9-1
 - update to latest upstream, mainly bug fix release
   Feature improvements
