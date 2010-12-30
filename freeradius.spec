@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
 Version: 2.1.10
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -559,6 +559,9 @@ fi
 %{_libdir}/freeradius/rlm_sql_unixodbc-%{version}.so
 
 %changelog
+* Thu Dec 30 2010 John Dennis <jdennis@redhat.com> - 2.1.10-2
+- rebuild for new MySQL libs
+
 * Tue Oct 19 2010 John Dennis <jdennis@redhat.com> - 2.1.10-1
   Feature improvements
   * Install the "radcrypt" program.
