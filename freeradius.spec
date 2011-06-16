@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
 Version: 2.1.10
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -576,6 +576,9 @@ exit 0
 %{_libdir}/freeradius/rlm_sql_unixodbc-%{version}.so
 
 %changelog
+* Thu Jun 16 2011 Marcela Mašláňová <mmaslano@redhat.com> - 2.1.10-8
+- Perl mass rebuild
+
 * Wed Mar 23 2011 John Dennis <jdennis@redhat.com> - 2.1.10-7
 - Resolves: #689045 Using rlm_perl cause radiusd failed to start
   Fix configure typo which caused lt_dladvise_* functions to be skipped.
