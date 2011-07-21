@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
 Version: 2.1.11
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -573,6 +573,9 @@ exit 0
 %{_libdir}/freeradius/rlm_sql_unixodbc-%{version}.so
 
 %changelog
+* Thu Jul 21 2011 Petr Sabata <contyk@redhat.com> - 2.1.11-4
+- Perl mass rebuild
+
 * Wed Jul 20 2011 Petr Sabata <contyk@redhat.com> - 2.1.11-3
 - Perl mass rebuild
 
