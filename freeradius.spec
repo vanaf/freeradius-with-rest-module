@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
 Version: 2.1.12
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -586,6 +586,12 @@ exit 0
 %{_libdir}/freeradius/rlm_sql_unixodbc-%{version}.so
 
 %changelog
+* Sun Jan 15 2012 John Dennis <jdennis@redhat.com> - 2.1.12-4
+- resolves: bug#781744
+  systemd service file incorrectly listed pid file as
+  /var/run/radiusd/radiusd which it should have been
+  /var/run/radiusd/radiusd.pid
+
 * Fri Jan 13 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.1.12-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
 
