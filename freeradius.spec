@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
 Version: 2.1.12
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -15,6 +15,9 @@ Source104: %{name}-tmpfiles.conf
 Patch1: freeradius-cert-config.patch
 Patch2: freeradius-radtest.patch
 Patch3: freeradius-man.patch
+Patch4: freeradius-unix-passwd-expire.patch
+Patch5: freeradius-radeapclient-ipv6.patch
+Patch6: freeradius-postgres-sql.patch
 
 Obsoletes: freeradius-devel
 Obsoletes: freeradius-libs
@@ -148,6 +151,10 @@ This plugin provides the unixODBC support for the FreeRADIUS server project.
 %patch1 -p1 -b .cert-config
 %patch2 -p1 -b .radtest
 %patch3 -p1 -b .man
+%patch4 -p1 -b unix-passwd-expire
+%patch5 -p1 -b radeapclient-ipv6
+%patch6 -p1 -b postgres-sql
+
 # Some source files mistakenly have execute permissions set
 find $RPM_BUILD_DIR/freeradius-server-%{version} \( -name '*.c' -o -name '*.h' \) -a -perm /0111 -exec chmod a-x {} +
 
@@ -162,6 +169,7 @@ export CFLAGS="$RPM_OPT_FLAGS -fpic"
         --libdir=%{_libdir}/freeradius \
         --with-system-libtool \
         --disable-ltdl-install \
+        --with-udpfromto \
         --with-gnu-ld \
         --with-threads \
         --with-thread-pool \
@@ -590,6 +598,13 @@ exit 0
 %{_libdir}/freeradius/rlm_sql_unixodbc-%{version}.so
 
 %changelog
+* Tue Feb 28 2012 John Dennis <jdennis@redhat.com> - 2.1.12-6
+  Fixing bugs in RHEL6 rebase, applying fixes here as well
+  resolves: bug#700870 freeradius not compiled with --with-udpfromto
+  resolves: bug#753764 shadow password expiration does not work
+  resolves: bug#712803 radtest script is not working with eap-md5 option
+  resolves: bug#690756 errors in raddb/sql/postgresql/admin.sql template
+
 * Tue Feb  7 2012 John Dennis <jdennis@redhat.com> - 2.1.12-5
 - resolves: bug#781877 (from RHEL5) rlm_dbm_parse man page misspelled
 - resolves: bug#760193 (from RHEL5) radtest PPPhint option is not parsed properly
