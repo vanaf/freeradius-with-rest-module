@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
 Version: 2.1.12
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -39,6 +39,7 @@ BuildRequires: readline-devel
 BuildRequires: libpcap-devel
 BuildRequires: systemd-units
 
+Requires: openssl
 Requires(pre): shadow-utils glibc-common
 Requires(post): systemd-sysv
 Requires(post): systemd-units
@@ -600,6 +601,9 @@ exit 0
 %{_libdir}/freeradius/rlm_sql_unixodbc-%{version}.so
 
 %changelog
+* Tue May 15 2012 John Dennis <jdennis@redhat.com> - 2.1.12-8
+- resolves: bug#821407 - openssl dependency
+
 * Sat Apr 14 2012 John Dennis <jdennis@redhat.com> - 2.1.12-7
 - resolves: bug#810605 Segfault with freeradius-perl threading
 
