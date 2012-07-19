@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
 Version: 2.1.12
-Release: 9%{?dist}
+Release: 10%{?dist}
 License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -601,6 +601,9 @@ exit 0
 %{_libdir}/freeradius/rlm_sql_unixodbc-%{version}.so
 
 %changelog
+* Thu Jul 19 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.1.12-10
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
+
 * Fri Jun 08 2012 Petr Pisar <ppisar@redhat.com> - 2.1.12-9
 - Perl 5.16 rebuild
 
