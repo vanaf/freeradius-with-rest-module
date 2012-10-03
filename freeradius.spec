@@ -694,6 +694,12 @@ exit 0
   * Add more sanity checks in dynamic_clients code so the server won't
     crash if it attempts to load a badly formated client definition.
 
+* Thu Jul 19 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.1.12-10
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
+
+* Fri Jun 08 2012 Petr Pisar <ppisar@redhat.com> - 2.1.12-9
+- Perl 5.16 rebuild
+
 * Tue May 15 2012 John Dennis <jdennis@redhat.com> - 2.1.12-8
 - resolves: bug#821407 - openssl dependency
 
