@@ -712,6 +712,9 @@ exit 0
 * Mon Jul 22 2013 John Dennis <jdennis@redhat.com> - 3.0.0-rc0.0
 - Upgrade to new upstream major version release
 
+* Wed Jul 17 2013 Petr Pisar <ppisar@redhat.com> - 2.2.0-7
+- Perl 5.18 rebuild
+
 * Wed Feb 13 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.2.0-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
 
