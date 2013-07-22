@@ -1,33 +1,34 @@
 Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
-Version: 2.2.0
-Release: 6%{?dist}
+Version: 3.0.0
+Release: rc0.0%{?dist}
 License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
 
-Source0: ftp://ftp.freeradius.org/pub/radius/freeradius-server-%{version}.tar.bz2
+# Is elliptic curve cryptography supported?
+%if 0%{?rhel}
+%global HAVE_EC_CRYPTO 1
+%else
+%global HAVE_EC_CRYPTO 0
+%endif
+
+%global dist_base freeradius-server-release_3_0_0_rc0
+
+Source0: %{dist_base}.tar.gz
+#FIXME, after 3.0 is released  Source0: ftp://ftp.freeradius.org/pub/radius/%{dist_base}.tar.bz2
 Source100: radiusd.service
 Source102: freeradius-logrotate
 Source103: freeradius-pam-conf
 Source104: %{name}-tmpfiles.conf
 
-Patch1: freeradius-cert-config.patch
-Patch2: freeradius-radtest.patch
-Patch3: freeradius-radeapclient-ipv6.patch
-Patch4: freeradius-exclude-config-file.patch
-Patch5: freeradius-dhcp_sqlippool.patch
+Patch1: freeradius-redhat-config.patch
 
-Obsoletes: freeradius-devel
-Obsoletes: freeradius-libs
-
-%define docdir %{_docdir}/freeradius-%{version}
-%define initddir %{?_initddir:%{_initddir}}%{!?_initddir:%{_initrddir}}
+%global docdir %{_docdir}/freeradius-%{version}
 
 BuildRequires: autoconf
 BuildRequires: gdbm-devel
-BuildRequires: libtool
-BuildRequires: libtool-ltdl-devel
+BuildRequires: openssl
 BuildRequires: openssl-devel
 BuildRequires: pam-devel
 BuildRequires: zlib-devel
@@ -36,6 +37,14 @@ BuildRequires: net-snmp-utils
 BuildRequires: readline-devel
 BuildRequires: libpcap-devel
 BuildRequires: systemd-units
+BuildRequires: libtalloc-devel
+BuildRequires: pcre-devel
+
+%if ! 0%{?rhel}
+BuildRequires: tncfhh-devel
+BuildRequires: libyubikey-devel
+BuildRequires: ykclient-devel
+%endif
 
 Requires: openssl
 Requires(pre): shadow-utils glibc-common
@@ -74,6 +83,14 @@ of the server, and let you decide if they satisfy your needs.
 Support for RFC and VSA Attributes Additional server configuration
 attributes Selecting a particular configuration Authentication methods
 
+%package devel
+Group: System Environment/Daemons
+Summary: FreeRADIUS utilities
+Requires: %{name} = %{version}-%{release}
+
+%description devel
+Development headers and libraries for FreeRADIUS.
+
 %package ldap
 Summary: LDAP support for freeradius
 Group: System Environment/Daemons
@@ -98,12 +115,7 @@ Group: System Environment/Daemons
 Requires: %{name} = %{version}-%{release}
 Requires: perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 %{?fedora:BuildRequires: perl-devel}
-%if 0%{?rhel} <= 5
-BuildRequires: perl
-%endif
-%if 0%{?rhel} >= 6
 BuildRequires: perl-devel
-%endif
 BuildRequires: perl(ExtUtils::Embed)
 
 %description perl
@@ -136,6 +148,15 @@ BuildRequires: postgresql-devel
 %description postgresql
 This plugin provides the postgresql support for the FreeRADIUS server project.
 
+%package sqlite
+Summary: SQLite support for freeradius
+Group: System Environment/Daemons
+Requires: %{name} = %{version}-%{release}
+BuildRequires: sqlite-devel
+
+%description sqlite
+This plugin provides the SQLite support for the FreeRADIUS server project.
+
 %package unixODBC
 Summary: Unix ODBC support for freeradius
 Group: System Environment/Daemons
@@ -147,43 +168,17 @@ This plugin provides the unixODBC support for the FreeRADIUS server project.
 
 
 %prep
-%setup -q -n freeradius-server-%{version}
-%patch1 -p1 -b .cert-config
-%patch2 -p1 -b .radtest
-%patch3 -p1 -b radeapclient-ipv6
-%patch4 -p1 -b exclude-config-file
-# do not make backup file for module configs, the backup will be installed
-%patch5 -p1
-
-# Some source files mistakenly have execute permissions set
-find $RPM_BUILD_DIR/freeradius-server-%{version} \( -name '*.c' -o -name '*.h' \) -a -perm /0111 -exec chmod a-x {} +
+%setup -q -n %{dist_base}
+%patch1 -p1 -b .redhat-config
 
 %build
-# Add compile/link options
-#   -fpic, -fPIE, -DPIE -pie, -Wl,-znow
-#     Extra security for network facing daemon; fully relocatable code
-#     loaded at random addresses, address tables are read-only
-#   -fno-strict-aliasing
-#     Source code does not observe strict aliasing, disable certain
-#     optimizations which may yield unanticipated results, fixes this error:
-#     "dereferencing type-punned pointer will break strict-aliasing rules"
-%ifarch s390 s390x
-export CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing -fPIC -fPIE -DPIE"
-export LDFLAGS="-pie -Wl,-znow"
-%else
-export CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing -fpic -fPIE -DPIE"
-export LDFLAGS="-pie -Wl,-znow"
-%endif
+# Force compile/link options, extra security for network facing daemon
+%global _hardened_build 1
 
 %configure \
         --libdir=%{_libdir}/freeradius \
-        --with-system-libtool \
-        --with-system-libltdl \
-        --disable-ltdl-install \
         --with-udpfromto \
-        --with-gnu-ld \
         --with-threads \
-        --with-thread-pool \
         --with-docdir=%{docdir} \
         --with-rlm-sql_postgresql-include-dir=/usr/include/pgsql \
         --with-rlm-sql-postgresql-lib-dir=%{_libdir} \
@@ -192,28 +187,18 @@ export LDFLAGS="-pie -Wl,-znow"
         --with-unixodbc-lib-dir=%{_libdir} \
         --with-rlm-dbm-lib-dir=%{_libdir} \
         --with-rlm-krb5-include-dir=/usr/kerberos/include \
-        --with-modules="rlm_wimax" \
         --without-rlm_eap_ikev2 \
         --without-rlm_sql_iodbc \
         --without-rlm_sql_firebird \
         --without-rlm_sql_db2 \
         --without-rlm_sql_oracle
 
-%if "%{_lib}" == "lib64"
-perl -pi -e 's:sys_lib_search_path_spec=.*:sys_lib_search_path_spec="/lib64 /usr/lib64 /usr/local/lib64":' libtool
-%endif
-
 make
 
 %install
 mkdir -p $RPM_BUILD_ROOT/%{_localstatedir}/lib/radiusd
-# fix for bad libtool bug - can not rebuild dependent libs and bins
-#FIXME export LD_LIBRARY_PATH=$RPM_BUILD_ROOT/%{_libdir}
 make install R=$RPM_BUILD_ROOT
-# modify default configuration
-RADDB=$RPM_BUILD_ROOT%{_sysconfdir}/raddb
-perl -i -pe 's/^#user =.*$/user = radiusd/'   $RADDB/radiusd.conf
-perl -i -pe 's/^#group =.*$/group = radiusd/' $RADDB/radiusd.conf
+
 # logs
 mkdir -p $RPM_BUILD_ROOT/var/log/radius/radacct
 touch $RPM_BUILD_ROOT/var/log/radius/{radutmp,radius.log}
@@ -228,25 +213,32 @@ install -d -m 0710 %{buildroot}%{_localstatedir}/run/radiusd/
 install -m 0644 %{SOURCE104} %{buildroot}%{_sysconfdir}/tmpfiles.d/radiusd.conf
 
 # remove unneeded stuff
-rm -rf doc/00-OLD
+rm -f $RPM_BUILD_ROOT/%{_sysconfdir}/raddb/certs/*.crt
+rm -f $RPM_BUILD_ROOT/%{_sysconfdir}/raddb/certs/*.csr
+rm -f $RPM_BUILD_ROOT/%{_sysconfdir}/raddb/certs/*.der
+rm -f $RPM_BUILD_ROOT/%{_sysconfdir}/raddb/certs/*.key
+rm -f $RPM_BUILD_ROOT/%{_sysconfdir}/raddb/certs/*.pem
+rm -f $RPM_BUILD_ROOT/%{_sysconfdir}/raddb/certs/*.p12
+rm -f $RPM_BUILD_ROOT/%{_sysconfdir}/raddb/certs/index.*
+rm -f $RPM_BUILD_ROOT/%{_sysconfdir}/raddb/certs/serial*
+rm -f $RPM_BUILD_ROOT/%{_sysconfdir}/raddb/certs/dh
+rm -f $RPM_BUILD_ROOT/%{_sysconfdir}/raddb/certs/random
+
 rm -f $RPM_BUILD_ROOT/usr/sbin/rc.radiusd
 rm -rf $RPM_BUILD_ROOT/%{_libdir}/freeradius/*.a
 rm -rf $RPM_BUILD_ROOT/%{_libdir}/freeradius/*.la
-rm -rf $RPM_BUILD_ROOT/%{_sysconfdir}/raddb/sql/mssql
-rm -rf $RPM_BUILD_ROOT/%{_sysconfdir}/raddb/sql/oracle
-rm -rf $RPM_BUILD_ROOT/%{_datadir}/dialup_admin/sql/oracle
-rm -rf $RPM_BUILD_ROOT/%{_datadir}/dialup_admin/lib/sql/oracle
-rm -rf $RPM_BUILD_ROOT/%{_datadir}/dialup_admin/lib/sql/drivers/oracle
 
-# remove header files, we don't ship a devel package and the
-# headers have multilib conflicts
-rm -rf $RPM_BUILD_ROOT/%{_includedir}
+rm -rf $RPM_BUILD_ROOT/etc/raddb/mods-config/sql/main/mssql
+
+rm -rf $RPM_BUILD_ROOT/etc/raddb/mods-config/sql/ippool/oracle
+rm -rf $RPM_BUILD_ROOT/etc/raddb/mods-config/sql/main/oracle
+
 
 # remove unsupported config files
 rm -f $RPM_BUILD_ROOT/%{_sysconfdir}/raddb/experimental.conf
 
 # install doc files omitted by standard install
-for f in COPYRIGHT CREDITS INSTALL README; do
+for f in COPYRIGHT CREDITS INSTALL README.rst VERSION; do
     cp $f $RPM_BUILD_ROOT/%{docdir}
 done
 cp LICENSE $RPM_BUILD_ROOT/%{docdir}/LICENSE.gpl
@@ -259,7 +251,7 @@ cat >> $RPM_BUILD_ROOT/%{docdir}/REDHAT << EOF
 Red Hat, RHEL, Fedora, and CentOS specific information can be found on the
 FreeRADIUS Wiki in the Red Hat FAQ.
 
-http://wiki.freeradius.org/Red_Hat_FAQ
+http://wiki.freeradius.org/guide/Red-Hat-FAQ
 
 Please reference that document.
 
@@ -293,144 +285,35 @@ if [ $1 -eq 0 ]; then           # uninstall
 fi
 exit 0
 
-%triggerun -- freeradius < 2.1.11-5
-# Save the current service runlevel info
-# User must manually run systemd-sysv-convert --apply radiusd
-# to migrate them to systemd targets
-/usr/bin/systemd-sysv-convert --save radiusd >/dev/null 2>&1 ||:
-
-# Run these because the SysV package being removed won't do them
-/sbin/chkconfig --del radiusd >/dev/null 2>&1 || :
 /bin/systemctl try-restart radiusd.service >/dev/null 2>&1 || :
 
 
 %files
 %defattr(-,root,root)
+
+# doc
 %doc %{docdir}/
-%config(noreplace) %{_sysconfdir}/pam.d/radiusd
-%config(noreplace) %{_sysconfdir}/logrotate.d/radiusd
-%{_unitdir}/radiusd.service
-%config %{_sysconfdir}/tmpfiles.d/radiusd.conf
-%dir %attr(710,radiusd,radiusd) %{_localstatedir}/run/radiusd
-%dir %attr(755,radiusd,radiusd) %{_localstatedir}/lib/radiusd
-# configs
-%dir %attr(755,root,radiusd) /etc/raddb
-%defattr(-,root,radiusd)
-%attr(644,root,radiusd) %config(noreplace) /etc/raddb/dictionary
-%config(noreplace) /etc/raddb/acct_users
-%config(noreplace) /etc/raddb/attrs
-%config(noreplace) /etc/raddb/attrs.access_challenge
-%config(noreplace) /etc/raddb/attrs.access_reject
-%config(noreplace) /etc/raddb/attrs.accounting_response
-%config(noreplace) /etc/raddb/attrs.pre-proxy
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/clients.conf
-%config(noreplace) /etc/raddb/hints
-%config(noreplace) /etc/raddb/huntgroups
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sqlippool.conf
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/preproxy_users
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/proxy.conf
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/radiusd.conf
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sql.conf
-%dir %attr(750,root,radiusd) /etc/raddb/sql
-#%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sql/oracle/*
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/users
-%dir %attr(770,root,radiusd) /etc/raddb/certs
-%config(noreplace) /etc/raddb/certs/Makefile
-%config(noreplace) /etc/raddb/certs/README
-%config(noreplace) /etc/raddb/certs/xpextensions
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/certs/*.cnf
-%attr(750,root,radiusd) /etc/raddb/certs/bootstrap
-%dir %attr(750,root,radiusd) /etc/raddb/sites-available
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sites-available/*
-%dir %attr(750,root,radiusd) /etc/raddb/sites-enabled
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sites-enabled/*
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/eap.conf
-%config(noreplace) %attr(640,root,radiusd) /etc/raddb/example.pl
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/policy.conf
-%config(noreplace) /etc/raddb/policy.txt
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/templates.conf
-%dir %attr(750,root,radiusd) /etc/raddb/modules
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/acct_unique
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/always
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/attr_filter
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/attr_rewrite
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/cache
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/chap
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/checkval
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/counter
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/cui
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/detail
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/detail.example.com
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/detail.log
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/dhcp_sqlippool
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/digest
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/dynamic_clients
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/echo
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/etc_group
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/exec
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/expiration
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/expr
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/files
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/inner-eap
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/ippool
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/logintime
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/linelog
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/mac2ip
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/mac2vlan
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/mschap
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/ntlm_auth
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/opendirectory
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/otp
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/pam
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/pap
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/perl
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/passwd
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/policy
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/preprocess
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/radrelay
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/radutmp
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/realm
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/redis
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/rediswho
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/replicate
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/smbpasswd
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/smsotp
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/soh
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/sql_log
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/sqlcounter_expire_on_login
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/sradutmp
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/unix
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/wimax
-# binaries
-%defattr(-,root,root)
-/usr/sbin/checkrad
-/usr/sbin/raddebug
-/usr/sbin/radiusd
-/usr/sbin/radwatch
-/usr/sbin/radmin
+
 # man-pages
-%doc %{_mandir}/man5/acct_users.5.gz
 %doc %{_mandir}/man5/clients.conf.5.gz
 %doc %{_mandir}/man5/dictionary.5.gz
 %doc %{_mandir}/man5/radiusd.conf.5.gz
 %doc %{_mandir}/man5/radrelay.conf.5.gz
-%doc %{_mandir}/man5/rlm_acct_unique.5.gz
 %doc %{_mandir}/man5/rlm_always.5.gz
 %doc %{_mandir}/man5/rlm_attr_filter.5.gz
-%doc %{_mandir}/man5/rlm_attr_rewrite.5.gz
 %doc %{_mandir}/man5/rlm_chap.5.gz
 %doc %{_mandir}/man5/rlm_counter.5.gz
 %doc %{_mandir}/man5/rlm_detail.5.gz
 %doc %{_mandir}/man5/rlm_digest.5.gz
 %doc %{_mandir}/man5/rlm_expr.5.gz
 %doc %{_mandir}/man5/rlm_files.5.gz
+%doc %{_mandir}/man5/rlm_idn.5.gz
 %doc %{_mandir}/man5/rlm_mschap.5.gz
 %doc %{_mandir}/man5/rlm_pap.5.gz
 %doc %{_mandir}/man5/rlm_passwd.5.gz
 %doc %{_mandir}/man5/rlm_policy.5.gz
 %doc %{_mandir}/man5/rlm_realm.5.gz
 %doc %{_mandir}/man5/rlm_sql.5.gz
-%doc %{_mandir}/man5/rlm_sql_log.5.gz
 %doc %{_mandir}/man5/rlm_unix.5.gz
 %doc %{_mandir}/man5/unlang.5.gz
 %doc %{_mandir}/man5/users.5.gz
@@ -439,116 +322,273 @@ exit 0
 %doc %{_mandir}/man8/radmin.8.gz
 %doc %{_mandir}/man8/radrelay.8.gz
 %doc %{_mandir}/man8/radwatch.8.gz
+
+# system
+%config(noreplace) %{_sysconfdir}/pam.d/radiusd
+%config(noreplace) %{_sysconfdir}/logrotate.d/radiusd
+%{_unitdir}/radiusd.service
+%config %{_sysconfdir}/tmpfiles.d/radiusd.conf
+%dir %attr(710,radiusd,radiusd) %{_localstatedir}/run/radiusd
+%dir %attr(755,radiusd,radiusd) %{_localstatedir}/lib/radiusd
+
+# configs (raddb)
+%dir %attr(755,root,radiusd) /etc/raddb
+%defattr(-,root,radiusd)
+/etc/raddb/README.rst
+%attr(644,root,radiusd) %config(noreplace) /etc/raddb/dictionary
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/clients.conf
+
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/templates.conf
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/trigger.conf
+
+# symlink: /etc/raddb/hints -> ./mods-config/preprocess/hints
+%config /etc/raddb/hints
+
+# symlink: /etc/raddb/huntgroups -> ./mods-config/preprocess/huntgroups
+%config /etc/raddb/huntgroups
+
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/proxy.conf
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/radiusd.conf
+
+# symlink: /etc/raddb/users -> ./mods-config/files/authorize
+%config(noreplace) /etc/raddb/users
+
+# certs
+%dir %attr(770,root,radiusd) /etc/raddb/certs
+%config(noreplace) /etc/raddb/certs/Makefile
+/etc/raddb/certs/README
+%config(noreplace) /etc/raddb/certs/xpextensions
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/certs/*.cnf
+%attr(750,root,radiusd) /etc/raddb/certs/bootstrap
+
+# mods-config
+%dir %attr(750,root,radiusd) /etc/raddb/mods-config
+/etc/raddb/mods-config/README.rst
+%dir %attr(750,root,radiusd) /etc/raddb/mods-config/attr_filter
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/attr_filter/*
+%dir %attr(750,root,radiusd) /etc/raddb/mods-config/files
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/files/*
+%dir %attr(750,root,radiusd) /etc/raddb/mods-config/preprocess
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/preprocess/*
+
+%dir %attr(750,root,radiusd) /etc/raddb/mods-config/sql
+%dir %attr(750,root,radiusd) /etc/raddb/mods-config/sql/counter
+%dir %attr(750,root,radiusd) /etc/raddb/mods-config/sql/cui
+%dir %attr(750,root,radiusd) /etc/raddb/mods-config/sql/ippool
+%dir %attr(750,root,radiusd) /etc/raddb/mods-config/sql/ippool-dhcp
+%dir %attr(750,root,radiusd) /etc/raddb/mods-config/sql/main
+
+# sites-available
+%dir %attr(750,root,radiusd) /etc/raddb/sites-available
+/etc/raddb/sites-available/README
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sites-available/control-socket
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sites-available/decoupled-accounting
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sites-available/robust-proxy-accounting
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sites-available/soh
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sites-available/coa
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sites-available/example
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sites-available/inner-tunnel
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sites-available/dhcp
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sites-available/check-eap-tls
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sites-available/status
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sites-available/dhcp.relay
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sites-available/virtual.example.com
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sites-available/originate-coa
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sites-available/vmps
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sites-available/default
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sites-available/proxy-inner-tunnel
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sites-available/dynamic-clients
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sites-available/copy-acct-to-home-server
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sites-available/buffered-sql
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sites-available/tls
+
+# sites-enabled
+
+%dir %attr(750,root,radiusd) /etc/raddb/sites-enabled
+
+# symlink: /etc/raddb/sites-enabled/inner-tunnel -> ../sites-available/inner-tunnel
+/etc/raddb/sites-enabled/inner-tunnel
+
+# symlink: /etc/raddb/sites-enabled/default -> ../sites-available/default
+/etc/raddb/sites-enabled/default
+
+# mods-available
+%dir %attr(750,root,radiusd) /etc/raddb/mods-available
+/etc/raddb/mods-available/README.rst
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/always
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/attr_filter
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/cache
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/cache_eap
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/chap
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/counter
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/cui
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/detail
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/detail.example.com
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/detail.log
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/dhcp
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/dhcp_sqlippool
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/digest
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/dynamic_clients
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/eap
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/echo
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/etc_group
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/exec
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/expiration
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/expr
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/files
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/idn
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/inner-eap
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/ippool
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/linelog
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/logintime
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/mac2ip
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/mac2vlan
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/mschap
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/ntlm_auth
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/opendirectory
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/otp
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/pam
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/pap
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/passwd
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/preprocess
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/radutmp
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/realm
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/redis
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/rediswho
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/replicate
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/rest
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/smbpasswd
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/smsotp
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/soh
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/sometimes
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/sql
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/sqlippool
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/sradutmp
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/unix
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/utf8
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/wimax
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/yubikey
+
+# mods-enabled
+# symlink: /etc/raddb/mods-enabled/xxx -> ../mods-available/xxx
+%dir %attr(750,root,radiusd) /etc/raddb/mods-enabled
+%config(missingok) /etc/raddb/mods-enabled/always
+%config(missingok) /etc/raddb/mods-enabled/attr_filter
+%config(missingok) /etc/raddb/mods-enabled/cache_eap
+%config(missingok) /etc/raddb/mods-enabled/chap
+%config(missingok) /etc/raddb/mods-enabled/detail
+%config(missingok) /etc/raddb/mods-enabled/detail.log
+%config(missingok) /etc/raddb/mods-enabled/dhcp
+%config(missingok) /etc/raddb/mods-enabled/digest
+%config(missingok) /etc/raddb/mods-enabled/dynamic_clients
+%config(missingok) /etc/raddb/mods-enabled/eap
+%config(missingok) /etc/raddb/mods-enabled/echo
+%config(missingok) /etc/raddb/mods-enabled/exec
+%config(missingok) /etc/raddb/mods-enabled/expiration
+%config(missingok) /etc/raddb/mods-enabled/expr
+%config(missingok) /etc/raddb/mods-enabled/files
+%config(missingok) /etc/raddb/mods-enabled/linelog
+%config(missingok) /etc/raddb/mods-enabled/logintime
+%config(missingok) /etc/raddb/mods-enabled/mschap
+%config(missingok) /etc/raddb/mods-enabled/ntlm_auth
+%config(missingok) /etc/raddb/mods-enabled/pap
+%config(missingok) /etc/raddb/mods-enabled/passwd
+%config(missingok) /etc/raddb/mods-enabled/preprocess
+%config(missingok) /etc/raddb/mods-enabled/radutmp
+%config(missingok) /etc/raddb/mods-enabled/realm
+%config(missingok) /etc/raddb/mods-enabled/replicate
+%config(missingok) /etc/raddb/mods-enabled/soh
+%config(missingok) /etc/raddb/mods-enabled/sradutmp
+%config(missingok) /etc/raddb/mods-enabled/unix
+%config(missingok) /etc/raddb/mods-enabled/utf8
+
+# policy
+%dir %attr(750,root,radiusd) /etc/raddb/policy.d
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/policy.d/accounting
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/policy.d/canonicalization
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/policy.d/control
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/policy.d/cui
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/policy.d/dhcp
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/policy.d/eap
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/policy.d/filter
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/policy.d/operator-name
+
+
+# binaries
+%defattr(-,root,root)
+/usr/sbin/checkrad
+/usr/sbin/raddebug
+/usr/sbin/radiusd
+/usr/sbin/radmin
+
 # dictionaries
 %dir %attr(755,root,root) /usr/share/freeradius
 /usr/share/freeradius/*
+
 # logs
 %dir %attr(700,radiusd,radiusd) /var/log/radius/
 %dir %attr(700,radiusd,radiusd) /var/log/radius/radacct/
 %ghost %attr(644,radiusd,radiusd) /var/log/radius/radutmp
 %ghost %attr(600,radiusd,radiusd) /var/log/radius/radius.log
-# RADIUS shared libs
+
+# libs
 %attr(755,root,root) %{_libdir}/freeradius/lib*.so*
-# RADIUS Loadable Modules
+
+# loadable modules
 %dir %attr(755,root,root) %{_libdir}/freeradius
-#%attr(755,root,root) %{_libdir}/freeradius/rlm_*.so*
-#%{_libdir}/freeradius/rlm_acctlog*.so
-%{_libdir}/freeradius/rlm_acct_unique.so
-%{_libdir}/freeradius/rlm_acct_unique-%{version}.so
-%{_libdir}/freeradius/rlm_acctlog.so
-%{_libdir}/freeradius/rlm_acctlog-%{version}.so
+%{_libdir}/freeradius/proto_dhcp.so
+%{_libdir}/freeradius/proto_vmps.so
 %{_libdir}/freeradius/rlm_always.so
-%{_libdir}/freeradius/rlm_always-%{version}.so
 %{_libdir}/freeradius/rlm_attr_filter.so
-%{_libdir}/freeradius/rlm_attr_filter-%{version}.so
-%{_libdir}/freeradius/rlm_attr_rewrite.so
-%{_libdir}/freeradius/rlm_attr_rewrite-%{version}.so
 %{_libdir}/freeradius/rlm_cache.so
-%{_libdir}/freeradius/rlm_cache-%{version}.so
 %{_libdir}/freeradius/rlm_chap.so
-%{_libdir}/freeradius/rlm_chap-%{version}.so
-%{_libdir}/freeradius/rlm_checkval.so
-%{_libdir}/freeradius/rlm_checkval-%{version}.so
-%{_libdir}/freeradius/rlm_copy_packet.so
-%{_libdir}/freeradius/rlm_copy_packet-%{version}.so
 %{_libdir}/freeradius/rlm_counter.so
-%{_libdir}/freeradius/rlm_counter-%{version}.so
-%{_libdir}/freeradius/rlm_dbm.so
-%{_libdir}/freeradius/rlm_dbm-%{version}.so
+%{_libdir}/freeradius/rlm_cram.so
 %{_libdir}/freeradius/rlm_detail.so
-%{_libdir}/freeradius/rlm_detail-%{version}.so
+%{_libdir}/freeradius/rlm_dhcp.so
 %{_libdir}/freeradius/rlm_digest.so
-%{_libdir}/freeradius/rlm_digest-%{version}.so
 %{_libdir}/freeradius/rlm_dynamic_clients.so
-%{_libdir}/freeradius/rlm_dynamic_clients-%{version}.so
 %{_libdir}/freeradius/rlm_eap.so
-%{_libdir}/freeradius/rlm_eap-%{version}.so
 %{_libdir}/freeradius/rlm_eap_gtc.so
-%{_libdir}/freeradius/rlm_eap_gtc-%{version}.so
 %{_libdir}/freeradius/rlm_eap_leap.so
-%{_libdir}/freeradius/rlm_eap_leap-%{version}.so
 %{_libdir}/freeradius/rlm_eap_md5.so
-%{_libdir}/freeradius/rlm_eap_md5-%{version}.so
 %{_libdir}/freeradius/rlm_eap_mschapv2.so
-%{_libdir}/freeradius/rlm_eap_mschapv2-%{version}.so
 %{_libdir}/freeradius/rlm_eap_peap.so
-%{_libdir}/freeradius/rlm_eap_peap-%{version}.so
+%if %{HAVE_EC_CRYPTO}
+%{_libdir}/freeradius/rlm_eap_pwd.so
+%endif
 %{_libdir}/freeradius/rlm_eap_sim.so
-%{_libdir}/freeradius/rlm_eap_sim-%{version}.so
 %{_libdir}/freeradius/rlm_eap_tls.so
-%{_libdir}/freeradius/rlm_eap_tls-%{version}.so
+%if ! 0%{?rhel}
+%{_libdir}/freeradius/rlm_eap_tnc.so
+%endif
 %{_libdir}/freeradius/rlm_eap_ttls.so
-%{_libdir}/freeradius/rlm_eap_ttls-%{version}.so
 %{_libdir}/freeradius/rlm_exec.so
-%{_libdir}/freeradius/rlm_exec-%{version}.so
 %{_libdir}/freeradius/rlm_expiration.so
-%{_libdir}/freeradius/rlm_expiration-%{version}.so
 %{_libdir}/freeradius/rlm_expr.so
-%{_libdir}/freeradius/rlm_expr-%{version}.so
-%{_libdir}/freeradius/rlm_fastusers.so
-%{_libdir}/freeradius/rlm_fastusers-%{version}.so
 %{_libdir}/freeradius/rlm_files.so
-%{_libdir}/freeradius/rlm_files-%{version}.so
 %{_libdir}/freeradius/rlm_ippool.so
-%{_libdir}/freeradius/rlm_ippool-%{version}.so
 %{_libdir}/freeradius/rlm_linelog.so
-%{_libdir}/freeradius/rlm_linelog-%{version}.so
 %{_libdir}/freeradius/rlm_logintime.so
-%{_libdir}/freeradius/rlm_logintime-%{version}.so
 %{_libdir}/freeradius/rlm_mschap.so
-%{_libdir}/freeradius/rlm_mschap-%{version}.so
 %{_libdir}/freeradius/rlm_otp.so
-%{_libdir}/freeradius/rlm_otp-%{version}.so
 %{_libdir}/freeradius/rlm_pam.so
-%{_libdir}/freeradius/rlm_pam-%{version}.so
 %{_libdir}/freeradius/rlm_pap.so
-%{_libdir}/freeradius/rlm_pap-%{version}.so
 %{_libdir}/freeradius/rlm_passwd.so
-%{_libdir}/freeradius/rlm_passwd-%{version}.so
-%{_libdir}/freeradius/rlm_policy.so
-%{_libdir}/freeradius/rlm_policy-%{version}.so
 %{_libdir}/freeradius/rlm_preprocess.so
-%{_libdir}/freeradius/rlm_preprocess-%{version}.so
 %{_libdir}/freeradius/rlm_radutmp.so
-%{_libdir}/freeradius/rlm_radutmp-%{version}.so
 %{_libdir}/freeradius/rlm_realm.so
-%{_libdir}/freeradius/rlm_realm-%{version}.so
 %{_libdir}/freeradius/rlm_replicate.so
-%{_libdir}/freeradius/rlm_replicate-%{version}.so
 %{_libdir}/freeradius/rlm_soh.so
-%{_libdir}/freeradius/rlm_soh-%{version}.so
+%{_libdir}/freeradius/rlm_sometimes.so
 %{_libdir}/freeradius/rlm_sql.so
-%{_libdir}/freeradius/rlm_sql-%{version}.so
-%{_libdir}/freeradius/rlm_sql_log.so
-%{_libdir}/freeradius/rlm_sql_log-%{version}.so
 %{_libdir}/freeradius/rlm_sqlcounter.so
-%{_libdir}/freeradius/rlm_sqlcounter-%{version}.so
 %{_libdir}/freeradius/rlm_sqlippool.so
-%{_libdir}/freeradius/rlm_sqlippool-%{version}.so
+%{_libdir}/freeradius/rlm_sql_null.so
 %{_libdir}/freeradius/rlm_unix.so
-%{_libdir}/freeradius/rlm_unix-%{version}.so
+%{_libdir}/freeradius/rlm_utf8.so
 %{_libdir}/freeradius/rlm_wimax.so
-%{_libdir}/freeradius/rlm_wimax-%{version}.so
+%{_libdir}/freeradius/rlm_yubikey.so
 
 %files utils
 /usr/bin/*
@@ -565,48 +605,113 @@ exit 0
 %doc %{_mandir}/man8/radcrypt.8.gz
 %doc %{_mandir}/man8/radsniff.8.gz
 %doc %{_mandir}/man8/radsqlrelay.8.gz
-%doc %{_mandir}/man8/rlm_dbm_cat.8.gz
-%doc %{_mandir}/man8/rlm_dbm_parser.8.gz
 %doc %{_mandir}/man8/rlm_ippool_tool.8.gz
+
+%files devel
+/usr/include/freeradius
 
 %files krb5
 %{_libdir}/freeradius/rlm_krb5.so
-%{_libdir}/freeradius/rlm_krb5-%{version}.so
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/krb5
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/krb5
 
 %files perl
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/perl
+
+%dir %attr(750,root,radiusd) /etc/raddb/mods-config/perl
+/etc/raddb/mods-config/perl/example.pl
+
 %{_libdir}/freeradius/rlm_perl.so
-%{_libdir}/freeradius/rlm_perl-%{version}.so
 
 %files python
+%dir %attr(750,root,radiusd) /etc/raddb/mods-config/python
+/etc/raddb/mods-config/python/example.py*
 %{_libdir}/freeradius/rlm_python.so
-%{_libdir}/freeradius/rlm_python-%{version}.so
 
 %files mysql
-%dir %attr(750,root,radiusd) /etc/raddb/sql/mysql
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sql/mysql/*
-%dir %attr(750,root,radiusd) /etc/raddb/sql/ndb
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sql/ndb/*
+%dir %attr(750,root,radiusd) /etc/raddb/mods-config/sql/counter/mysql
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/sql/counter/mysql/queries.conf
+
+%dir %attr(750,root,radiusd) /etc/raddb/mods-config/sql/cui/mysql
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/sql/cui/mysql/queries.conf
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/sql/cui/mysql/schema.sql
+
+%dir %attr(750,root,radiusd) /etc/raddb/mods-config/sql/ippool/mysql
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/sql/ippool/mysql/queries.conf
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/sql/ippool/mysql/schema.sql
+
+%dir %attr(750,root,radiusd) /etc/raddb/mods-config/sql/ippool-dhcp/mysql
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/sql/ippool-dhcp/mysql/queries.conf
+
+%dir %attr(750,root,radiusd) /etc/raddb/mods-config/sql/main/mysql
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/sql/main/mysql/setup.sql
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/sql/main/mysql/queries.conf
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/sql/main/mysql/schema.sql
+
+%dir %attr(750,root,radiusd) /etc/raddb/mods-config/sql/main/mysql/extras
+%dir %attr(750,root,radiusd) /etc/raddb/mods-config/sql/main/mysql/extras/wimax
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/sql/main/mysql/extras/wimax/queries.conf
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/sql/main/mysql/extras/wimax/schema.sql
+
+%dir %attr(750,root,radiusd) /etc/raddb/mods-config/sql/main/ndb
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/sql/main/ndb/setup.sql
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/sql/main/ndb/schema.sql
+/etc/raddb/mods-config/sql/main/ndb/README
+
 %{_libdir}/freeradius/rlm_sql_mysql.so
-%{_libdir}/freeradius/rlm_sql_mysql-%{version}.so
 
 %files postgresql
-%dir %attr(750,root,radiusd) /etc/raddb/sql/postgresql
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/sql/postgresql/*
+%dir %attr(750,root,radiusd) /etc/raddb/mods-config/sql/counter/postgresql
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/sql/counter/postgresql/queries.conf
+
+%dir %attr(750,root,radiusd) /etc/raddb/mods-config/sql/cui/postgresql
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/sql/cui/postgresql/queries.conf
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/sql/cui/postgresql/schema.sql
+
+%dir %attr(750,root,radiusd) /etc/raddb/mods-config/sql/ippool/postgresql
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/sql/ippool/postgresql/queries.conf
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/sql/ippool/postgresql/schema.sql
+
+%dir %attr(750,root,radiusd) /etc/raddb/mods-config/sql/main/postgresql
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/sql/main/postgresql/setup.sql
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/sql/main/postgresql/queries.conf
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/sql/main/postgresql/schema.sql
+
+%dir %attr(750,root,radiusd) /etc/raddb/mods-config/sql/main/postgresql/extras
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/sql/main/postgresql/extras/update_radacct_group.sql
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/sql/main/postgresql/extras/voip-postpaid.conf
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/sql/main/postgresql/extras/cisco_h323_db_schema.sql
+
 %{_libdir}/freeradius/rlm_sql_postgresql.so
-%{_libdir}/freeradius/rlm_sql_postgresql-%{version}.so
+
+%files sqlite
+%dir %attr(750,root,radiusd) /etc/raddb/mods-config/sql/cui/sqlite
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/sql/cui/sqlite/queries.conf
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/sql/cui/sqlite/schema.sql
+
+%dir %attr(750,root,radiusd) /etc/raddb/mods-config/sql/ippool/sqlite
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/sql/ippool/sqlite/queries.conf
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/sql/ippool/sqlite/schema.sql
+
+%dir %attr(750,root,radiusd) /etc/raddb/mods-config/sql/ippool-dhcp/sqlite
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/sql/ippool-dhcp/sqlite/queries.conf
+
+%dir %attr(750,root,radiusd) /etc/raddb/mods-config/sql/main/sqlite
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/sql/main/sqlite/queries.conf
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-config/sql/main/sqlite/schema.sql
+
+%{_libdir}/freeradius/rlm_sql_sqlite.so
 
 %files ldap
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/ldap.attrmap
 %{_libdir}/freeradius/rlm_ldap.so
-%{_libdir}/freeradius/rlm_ldap-%{version}.so
-%attr(640,root,radiusd) %config(noreplace) /etc/raddb/modules/ldap
+%attr(640,root,radiusd) %config(noreplace) /etc/raddb/mods-available/ldap
 
 %files unixODBC
 %{_libdir}/freeradius/rlm_sql_unixodbc.so
-%{_libdir}/freeradius/rlm_sql_unixodbc-%{version}.so
 
 %changelog
+* Mon Jul 22 2013 John Dennis <jdennis@redhat.com> - 3.0.0-rc0.0
+- Upgrade to new upstream major version release
+
 * Wed Feb 13 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.2.0-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
 

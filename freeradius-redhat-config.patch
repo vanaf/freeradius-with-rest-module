@@ -1,0 +1,13 @@
+--- freeradius-server-release_3_0_0_rc0.orig/raddb/radiusd.conf.in	2013-07-11 11:09:02.000000000 -0400
++++ freeradius-server-release_3_0_0_rc0/raddb/radiusd.conf.in	2013-07-20 07:51:22.811104727 -0400
+@@ -376,8 +376,8 @@
+ 	#  member.  This can allow for some finer-grained access
+ 	#  controls.
+ 	#
+-#	user = radius
+-#	group = radius
++	user = radiusd
++	group = radiusd
+ 
+ 	#  Core dumps are a bad thing.  This should only be set to
+ 	#  'yes' if you're debugging a problem with the server.
