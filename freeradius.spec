@@ -68,6 +68,14 @@ more.  Using RADIUS allows authentication and authorization for a network to
 be centralized, and minimizes the amount of re-configuration which has to be
 done when adding or deleting new users.
 
+%package doc
+Group: Documentation
+Summary: FreeRADIUS documentation
+
+%description doc
+All documentation supplied by the FreeRADIUS project is included
+in this package.
+
 %package utils
 Group: System Environment/Daemons
 Summary: FreeRADIUS utilities
@@ -85,7 +93,7 @@ attributes Selecting a particular configuration Authentication methods
 
 %package devel
 Group: System Environment/Daemons
-Summary: FreeRADIUS utilities
+Summary: FreeRADIUS development files
 Requires: %{name} = %{version}-%{release}
 
 %description devel
@@ -255,6 +263,8 @@ http://wiki.freeradius.org/guide/Red-Hat-FAQ
 
 Please reference that document.
 
+All documentation is in the freeradius-doc sub-package.
+
 EOF
 
 
@@ -292,36 +302,10 @@ exit 0
 %defattr(-,root,root)
 
 # doc
-%doc %{docdir}/
-
-# man-pages
-%doc %{_mandir}/man5/clients.conf.5.gz
-%doc %{_mandir}/man5/dictionary.5.gz
-%doc %{_mandir}/man5/radiusd.conf.5.gz
-%doc %{_mandir}/man5/radrelay.conf.5.gz
-%doc %{_mandir}/man5/rlm_always.5.gz
-%doc %{_mandir}/man5/rlm_attr_filter.5.gz
-%doc %{_mandir}/man5/rlm_chap.5.gz
-%doc %{_mandir}/man5/rlm_counter.5.gz
-%doc %{_mandir}/man5/rlm_detail.5.gz
-%doc %{_mandir}/man5/rlm_digest.5.gz
-%doc %{_mandir}/man5/rlm_expr.5.gz
-%doc %{_mandir}/man5/rlm_files.5.gz
-%doc %{_mandir}/man5/rlm_idn.5.gz
-%doc %{_mandir}/man5/rlm_mschap.5.gz
-%doc %{_mandir}/man5/rlm_pap.5.gz
-%doc %{_mandir}/man5/rlm_passwd.5.gz
-%doc %{_mandir}/man5/rlm_policy.5.gz
-%doc %{_mandir}/man5/rlm_realm.5.gz
-%doc %{_mandir}/man5/rlm_sql.5.gz
-%doc %{_mandir}/man5/rlm_unix.5.gz
-%doc %{_mandir}/man5/unlang.5.gz
-%doc %{_mandir}/man5/users.5.gz
-%doc %{_mandir}/man8/raddebug.8.gz
-%doc %{_mandir}/man8/radiusd.8.gz
-%doc %{_mandir}/man8/radmin.8.gz
-%doc %{_mandir}/man8/radrelay.8.gz
-%doc %{_mandir}/man8/radwatch.8.gz
+%doc %{docdir}/LICENSE.gpl
+%doc %{docdir}/LICENSE.lgpl
+%doc %{docdir}/LICENSE.openssl
+%doc %{docdir}/REDHAT
 
 # system
 %config(noreplace) %{_sysconfdir}/pam.d/radiusd
@@ -590,9 +574,40 @@ exit 0
 %{_libdir}/freeradius/rlm_wimax.so
 %{_libdir}/freeradius/rlm_yubikey.so
 
-%files utils
-/usr/bin/*
-# man-pages
+%files doc
+
+%doc %{docdir}/
+
+# main man pages
+%doc %{_mandir}/man5/clients.conf.5.gz
+%doc %{_mandir}/man5/dictionary.5.gz
+%doc %{_mandir}/man5/radiusd.conf.5.gz
+%doc %{_mandir}/man5/radrelay.conf.5.gz
+%doc %{_mandir}/man5/rlm_always.5.gz
+%doc %{_mandir}/man5/rlm_attr_filter.5.gz
+%doc %{_mandir}/man5/rlm_chap.5.gz
+%doc %{_mandir}/man5/rlm_counter.5.gz
+%doc %{_mandir}/man5/rlm_detail.5.gz
+%doc %{_mandir}/man5/rlm_digest.5.gz
+%doc %{_mandir}/man5/rlm_expr.5.gz
+%doc %{_mandir}/man5/rlm_files.5.gz
+%doc %{_mandir}/man5/rlm_idn.5.gz
+%doc %{_mandir}/man5/rlm_mschap.5.gz
+%doc %{_mandir}/man5/rlm_pap.5.gz
+%doc %{_mandir}/man5/rlm_passwd.5.gz
+%doc %{_mandir}/man5/rlm_policy.5.gz
+%doc %{_mandir}/man5/rlm_realm.5.gz
+%doc %{_mandir}/man5/rlm_sql.5.gz
+%doc %{_mandir}/man5/rlm_unix.5.gz
+%doc %{_mandir}/man5/unlang.5.gz
+%doc %{_mandir}/man5/users.5.gz
+%doc %{_mandir}/man8/raddebug.8.gz
+%doc %{_mandir}/man8/radiusd.8.gz
+%doc %{_mandir}/man8/radmin.8.gz
+%doc %{_mandir}/man8/radrelay.8.gz
+%doc %{_mandir}/man8/radwatch.8.gz
+
+# utils man pages
 %doc %{_mandir}/man1/radclient.1.gz
 %doc %{_mandir}/man1/radeapclient.1.gz
 %doc %{_mandir}/man1/radlast.1.gz
@@ -606,6 +621,10 @@ exit 0
 %doc %{_mandir}/man8/radsniff.8.gz
 %doc %{_mandir}/man8/radsqlrelay.8.gz
 %doc %{_mandir}/man8/rlm_ippool_tool.8.gz
+
+
+%files utils
+/usr/bin/*
 
 %files devel
 /usr/include/freeradius
