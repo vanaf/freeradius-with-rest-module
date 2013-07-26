@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
 Version: 3.0.0
-Release: 0.rc0%{?dist}
+Release: 0.1.rc0%{?dist}
 License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -24,7 +24,7 @@ Source104: %{name}-tmpfiles.conf
 
 Patch1: freeradius-redhat-config.patch
 
-%global docdir %{_docdir}/freeradius-%{version}
+%global docdir %{?_pkgdocdir}%{!?_pkgdocdir:%{_docdir}/%{name}-%{version}}
 
 BuildRequires: autoconf
 BuildRequires: gdbm-devel
@@ -728,6 +728,9 @@ exit 0
 %{_libdir}/freeradius/rlm_sql_unixodbc.so
 
 %changelog
+* Fri Jul 26 2013 Ville Skyttä <ville.skytta@iki.fi> - 3.0.0-0.1.rc0
+- Install docs to %%{_pkgdocdir} where available.
+
 * Mon Jul 22 2013 John Dennis <jdennis@redhat.com> - 3.0.0-0.rc0
 - Upgrade to new upstream major version release
 
