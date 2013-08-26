@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
 Version: 3.0.0
-Release: 0.2.rc0%{?dist}
+Release: 0.3.rc0%{?dist}
 License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -387,14 +387,10 @@ exit 0
 %attr(640,root,radiusd) %config(noreplace) /etc/raddb/sites-available/tls
 
 # sites-enabled
-
+# symlink: /etc/raddb/sites-enabled/xxx -> ../sites-available/xxx
 %dir %attr(750,root,radiusd) /etc/raddb/sites-enabled
-
-# symlink: /etc/raddb/sites-enabled/inner-tunnel -> ../sites-available/inner-tunnel
-/etc/raddb/sites-enabled/inner-tunnel
-
-# symlink: /etc/raddb/sites-enabled/default -> ../sites-available/default
-/etc/raddb/sites-enabled/default
+%config(missingok) /etc/raddb/sites-enabled/inner-tunnel
+%config(missingok) /etc/raddb/sites-enabled/default
 
 # mods-available
 %dir %attr(750,root,radiusd) /etc/raddb/mods-available
@@ -728,6 +724,9 @@ exit 0
 %{_libdir}/freeradius/rlm_sql_unixodbc.so
 
 %changelog
+* Mon Aug 26 2013 John Dennis <jdennis@redhat.com> - 3.0.0-0.3.rc0
+- add missingok config attribute to /etc/raddb/sites-enabled/* symlinks
+
 * Sat Aug 03 2013 Petr Pisar <ppisar@redhat.com> - 3.0.0-0.2.rc0
 - Perl 5.18 rebuild
 
