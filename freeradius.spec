@@ -723,6 +723,9 @@ exit 0
 %{_libdir}/freeradius/rlm_sql_unixodbc.so
 
 %changelog
+* Sun Sep  8 2013 John Dennis <jdennis@redhat.com> - 3.0.0-0.4.rc1
+- upgrade to second 3.0 release candidate rc1
+
 * Mon Aug 26 2013 John Dennis <jdennis@redhat.com> - 3.0.0-0.3.rc0
 - add missingok config attribute to /etc/raddb/sites-enabled/* symlinks
 
