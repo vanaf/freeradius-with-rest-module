@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
 Version: 3.0.0
-Release: 0.4.rc1%{?dist}
+Release: 1%{?dist}
 License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -13,10 +13,9 @@ URL: http://www.freeradius.org/
 %global HAVE_EC_CRYPTO 0
 %endif
 
-%global dist_base freeradius-server-release_3_0_0_rc1
+%global dist_base freeradius-server-3.0.0
 
-Source0: %{dist_base}.tar.gz
-#FIXME, after 3.0 is released  Source0: ftp://ftp.freeradius.org/pub/radius/%{dist_base}.tar.bz2
+Source0: ftp://ftp.freeradius.org/pub/radius/%{dist_base}.tar.bz2
 Source100: radiusd.service
 Source102: freeradius-logrotate
 Source103: freeradius-pam-conf
@@ -723,6 +722,11 @@ exit 0
 %{_libdir}/freeradius/rlm_sql_unixodbc.so
 
 %changelog
+* Sun Oct 13 2013 John Dennis <jdennis@redhat.com> - 3.0.0-1
+- Offical 3.0 gold release from upstream
+- resolves: bug#1016873
+- resolves: bug#891297
+
 * Sun Sep  8 2013 John Dennis <jdennis@redhat.com> - 3.0.0-0.4.rc1
 - upgrade to second 3.0 release candidate rc1
 
