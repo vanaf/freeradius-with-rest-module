@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
 Version: 3.0.3
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -762,6 +762,9 @@ exit 0
 %{_libdir}/freeradius/rlm_sql_unixodbc.so
 
 %changelog
+* Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 3.0.3-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
+
 * Mon Jun  2 2014 Nikolai Kondrashov <Nikolai.Kondrashov@redhat.com> - 3.0.3-2
 - Add explicit dependency on OpenSSL package with fixed CVE-2014-0160
   (Heartbleed bug).
