@@ -770,7 +770,6 @@ exit 0
   (Heartbleed bug).
 - Add confirmation of CVE-2014-0160 being fixed in OpenSSL to radiusd.conf.
 
-%changelog
 * Wed May 14 2014 Nikolai Kondrashov <Nikolai.Kondrashov@redhat.com> - 3.0.3-1
 - Upgrade to upstream 3.0.3 release.
   See upstream ChangeLog for details (in freeradius-doc subpackage).
