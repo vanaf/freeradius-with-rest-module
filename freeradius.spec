@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
 Version: 3.0.4
-Release: 0.1.rc2%{?dist}
+Release: 0.2.rc2%{?dist}
 License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -763,6 +763,9 @@ exit 0
 %{_libdir}/freeradius/rlm_sql_unixodbc.so
 
 %changelog
+* Tue Sep 09 2014 Jitka Plesnikova <jplesnik@redhat.com> - 3.0.4-0.2.rc2
+- Perl 5.20 mass
+
 * Mon Sep  8 2014 Nikolai Kondrashov <Nikolai.Kondrashov@redhat.com> - 3.0.4-0.1.rc2
 - Upgrade to upstream 3.0.4-rc2 release.
   See upstream ChangeLog for details (in freeradius-doc subpackage).
