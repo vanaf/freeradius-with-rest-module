@@ -1,7 +1,7 @@
 Summary: High-performance and highly configurable free RADIUS server
 Name: freeradius
 Version: 3.0.4
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv2+ and LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.freeradius.org/
@@ -824,6 +824,9 @@ exit 0
 %{_libdir}/freeradius/rlm_sql_unixodbc.so
 
 %changelog
+* Fri Feb 13 2015 Nikolai Kondrashov <Nikolai.Kondrashov@redhat.com> - 3.0.4-4
+- Bump release number to catch up with Fedora 21.
+
 * Mon Jan 19 2015 Nikolai Kondrashov <Nikolai.Kondrashov@redhat.com> - 3.0.4-3
 - Fix OpenSSL version parsing when checking for compatibility at run time.
   Resolves: Bug#1173821
